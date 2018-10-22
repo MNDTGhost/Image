@@ -1,4 +1,2 @@
 ﻿  Library.cpp
-     正在建立程式庫 D:\Visual Studio 2013 Project\Projects\MNDTLibrary\x64\Debug\MNDTLibrary.lib 和物件 D:\Visual Studio 2013 Project\Projects\MNDTLibrary\x64\Debug\MNDTLibrary.exp
-  MNDTLibrary.vcxproj -> D:\Visual Studio 2013 Project\Projects\MNDTLibrary\x64\Debug\MNDTLibrary.dll
-  MNDTLibrary.vcxproj -> D:\Visual Studio 2013 Project\Projects\MNDTLibrary\x64\Debug\MNDTLibrary.pdb (Full PDB)
+LINK : fatal error LNK1104: 無法開啟檔案 'D:\Visual Studio 2013 Project\Projects\MNDTLibrary\x64\Debug\MNDTLibrary.dll'

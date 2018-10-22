@@ -14,10 +14,8 @@ void Library::ChangeColor(C_UCHAE* src, UCHAE* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_UINT32 type)
 {
-	//assert(src != nullptr && pur != nullptr);
-	//assert(width > 0 && height > 0);
-	//Image imgSrc(src, width, height);
-	//Image imgPur(pur, width, height);
+	assert(src != nullptr && pur != nullptr);
+	assert(width > 0 && height > 0);
 
 	switch (type)
 	{
@@ -433,5 +431,607 @@ void Library::AdjustmentYCbCr(C_UCHAE* src, UCHAE* pur
 		pur++;
 		*pur = static_cast<UCHAE>(bgr[2]);
 		pur++;
+	}
+}
+
+void Library::ImagePadding8bit(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height
+	, C_INT32 pad)
+{
+	assert(src != nullptr && pur != nullptr);
+	assert(width > 0 && height > 0);
+	assert(pad >= 0);
+
+	C_UINT32 copySize = width * sizeof(UCHAE);
+	C_UINT32 purWidth = (width + 2 * pad);
+	C_UCHAE* srcEnd = src + width * height;
+
+	pur += (pad * purWidth) + pad;
+
+	while (src < srcEnd)
+	{
+		memcpy(pur, src, copySize);
+		pur += purWidth;
+		src += width;
+	}
+}
+
+void Library::Blur8bit(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height
+	, C_UINT32 size)
+{
+	assert(src != nullptr && pur != nullptr);
+	assert(width > 0 && height > 0);
+
+	if (!(size & 1))
+	{
+		const_cast<UINT32&>(size) = size + 1;
+	}
+
+	C_UINT32 blockSize = size * size;
+	C_INT32 pad = (size >> 1);
+	C_UINT32 padWidth = width + pad * 2;
+	C_UINT32 padHeight = height + pad * 2;
+	UCHAE* padSrc = new UCHAE[padWidth * padWidth];
+
+	ImagePadding8bit(src, padSrc, width, height, pad);
+
+	Image srcImage(padSrc, padWidth, padHeight, MNDT::ImageType::GRAY_8BIT);
+	Image purImage(pur, width, height, MNDT::ImageType::GRAY_8BIT);
+
+	for (UINT32 row = pad; row < padHeight - pad; row++)
+	{
+		for (UINT32 col = pad; col < padWidth - pad; col++)
+		{
+			UINT32 sum = 0;
+
+			for (int32_t blockRow = -pad; blockRow <= pad; blockRow++)
+			{
+				for (int32_t blockCol = -pad; blockCol <= pad; blockCol++)
+				{
+					sum += srcImage.image[row + blockRow][col + blockCol];
+				}
+			}
+			purImage.image[row - pad][col - pad] = sum / blockSize;
+		}
+	}
+
+	delete[] padSrc;
+	padSrc = nullptr;
+}
+
+void Library::BlurGauss8bit(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height
+	, C_UINT32 size, C_FLOAT sigma)
+{
+	assert(src != nullptr && pur != nullptr);
+	assert(width > 0 && height > 0);
+
+	if (!(size & 1))
+	{
+		const_cast<UINT32&>(size) = size + 1;
+	}
+
+	C_UINT32 blockSize = size * size;
+	C_INT32 pad = (size >> 1);
+	C_UINT32 padWidth = width + pad * 2;
+	C_UINT32 padHeight = height + pad * 2;
+	UCHAE* padSrc = new UCHAE[padWidth * padWidth];
+
+	ImagePadding8bit(src, padSrc, width, height, pad);
+
+	Image srcImage(padSrc, padWidth, padHeight, MNDT::ImageType::GRAY_8BIT);
+	Image purImage(pur, width, height, MNDT::ImageType::GRAY_8BIT);
+
+	float** temp = new float*[size];
+
+	for (UINT32 index = 0; index < size; index++)
+	{
+		temp[index] = new float[size];
+	}
+
+	Gaussian2DTemp(temp, size, sigma);
+
+
+	for (UINT32 row = pad; row < padHeight - pad; row++)
+	{
+		for (UINT32 col = pad; col < padWidth - pad; col++)
+		{
+			float sum = 0;
+
+			for (int32_t blockRow = -pad; blockRow <= pad; blockRow++)
+			{
+				for (int32_t blockCol = -pad; blockCol <= pad; blockCol++)
+				{
+					sum += (srcImage.image[row + blockRow][col + blockCol] * temp[pad + blockRow][pad + blockCol]);
+				}
+			}
+			purImage.image[row - pad][col - pad] = static_cast<UCHAE>(sum);
+		}
+	}
+
+
+
+	for (UINT32 index = 0; index < size; index++)
+	{
+		delete[] temp[index];
+		temp[index] = nullptr;
+	}
+	delete[] temp;
+	temp = nullptr;
+
+	delete[] padSrc;
+	padSrc = nullptr;
+}
+
+void Library::Gaussian2DTemp(float** const temp, C_INT32 size, C_FLOAT sigma)
+{
+	float sum = 0;
+	C_INT32 center = size >> 1;
+	C_FLOAT expBase = -(2.0f * sigma * sigma);
+	C_FLOAT scaleBase = (2.0f * sigma * sigma) *  static_cast<float>(MNDT::PI);
+
+	for (int32_t row = 0; row < size; row++)
+	{
+		C_INT32 y = center - row;
+		for (int32_t col = 0; col < size; col++)
+		{
+			C_INT32 x = col - center;
+
+			float gaussNum = 0;
+
+			gaussNum = exp((x * x + y * y) / expBase);
+			gaussNum = (gaussNum / scaleBase);
+			temp[row][col] = gaussNum;
+			sum += gaussNum;
+		}
+	}
+
+	for (int32_t row = 0; row < size; row++)
+	{
+		for (int32_t col = 0; col < size; col++)
+		{
+			temp[row][col] /= sum;
+		}
+	}
+}
+
+void Library::MedianBlur8bit(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height
+	, C_UINT32 size)
+{
+	assert(src != nullptr && pur != nullptr);
+	assert(width > 0 && height > 0);
+
+	if (!(size & 1))
+	{
+		const_cast<UINT32&>(size) = size + 1;
+	}
+
+	C_UINT32 blockSize = size * size;
+	C_UINT32 medianBlockSize = blockSize >> 1;
+	C_INT32 pad = (size >> 1);
+	C_UINT32 padWidth = width + pad * 2;
+	C_UINT32 padHeight = height + pad * 2;
+	UCHAE* padSrc = new UCHAE[padWidth * padWidth];
+
+	ImagePadding8bit(src, padSrc, width, height, pad);
+
+	Image srcImage(padSrc, padWidth, padHeight, MNDT::ImageType::GRAY_8BIT);
+	Image purImage(pur, width, height, MNDT::ImageType::GRAY_8BIT);
+	UCHAE* allPix = new UCHAE[blockSize];
+
+	for (UINT32 row = pad; row < padHeight - pad; row++)
+	{
+		for (UINT32 col = pad; col < padWidth - pad; col++)
+		{
+			UINT32 index = 0;
+			for (int32_t blockRow = -pad; blockRow <= pad; blockRow++)
+			{
+				for (int32_t blockCol = -pad; blockCol <= pad; blockCol++)
+				{
+					allPix[index++] = srcImage.image[row + blockRow][col + blockCol];
+				}
+			}
+			std::sort(allPix, allPix + blockSize);
+			purImage.image[row - pad][col - pad] = allPix[medianBlockSize];
+		}
+	}
+
+	delete[] allPix;
+	allPix = nullptr;
+
+	delete[] padSrc;
+	padSrc = nullptr;
+}
+
+
+void Library::BilateralBlur8bit(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height
+	, C_FLOAT spaceSigma, C_FLOAT colorSigma
+	, C_UINT32 size)
+{
+	assert(src != nullptr && pur != nullptr);
+	assert(width > 0 && height > 0);
+
+	if (!(size & 1))
+	{
+		const_cast<UINT32&>(size) = size + 1;
+	}
+
+	C_UINT32 blockSize = size * size;
+	C_INT32 pad = (size >> 1);
+	C_UINT32 padWidth = width + pad * 2;
+	C_UINT32 padHeight = height + pad * 2;
+	UCHAE* padSrc = new UCHAE[padWidth * padWidth];
+
+	ImagePadding8bit(src, padSrc, width, height, pad);
+
+	Image srcImage(padSrc, padWidth, padHeight, MNDT::ImageType::GRAY_8BIT);
+	Image purImage(pur, width, height, MNDT::ImageType::GRAY_8BIT);
+
+	C_FLOAT colorBase = -2.0f * colorSigma * colorSigma;
+	C_FLOAT spaceBase = -2.0f * spaceSigma * spaceSigma;
+	float* colorTemp = new float[256];
+	float** spaceTemp = new float *[size];
+
+	for (UINT32 index = 0; index < size; index++)
+	{
+		spaceTemp[index] = new float[size];
+	}
+
+	BilateralSpaceTemp(spaceTemp, size, spaceSigma);
+	BilateralColorTemp(colorTemp, colorSigma);
+
+	for (UINT32 row = pad; row < padHeight - pad; row++)
+	{
+		for (UINT32 col = pad; col < padWidth - pad; col++)
+		{
+			float sum = 0;
+			float base = 0;
+			C_CHAE& nowPix = srcImage.image[row][col];
+
+			for (int32_t blockRow = -pad; blockRow <= pad; blockRow++)
+			{
+				for (int32_t blockCol = -pad; blockCol <= pad; blockCol++)
+				{
+					C_CHAE& blockPix = srcImage.image[row + blockRow][col + blockCol];
+					C_UINT32 diff = abs(nowPix - blockPix);
+					C_FLOAT num = colorTemp[diff] * spaceTemp[pad + blockRow][pad + blockCol];
+
+					base += num;
+					sum += (num * blockPix);
+				}
+			}
+			purImage.image[row - pad][col - pad] = static_cast<UCHAE>(sum / base);
+		}
+	}
+
+
+	for (UINT32 index = 0; index < size; index++)
+	{
+		delete[] spaceTemp[index];
+		spaceTemp[index] = nullptr;
+	}
+
+	delete[] spaceTemp;
+	spaceTemp = nullptr;
+
+	delete[] colorTemp;
+	colorTemp = nullptr;
+
+	delete[] padSrc;
+	padSrc = nullptr;
+}
+
+
+void Library::BilateralSpaceTemp(float** const temp, C_INT32 size, C_FLOAT sigma)
+{
+	C_INT32 pad = (size >> 1);
+	C_FLOAT base = -2.0f * sigma * sigma;
+
+	for (int32_t row = 0; row < size; row++)
+	{
+		C_INT32 y = pad - row;
+		for (int32_t col = 0; col < size; col++)
+		{
+			C_INT32 x = col - pad;
+
+			temp[row][col] = ((x * x) + (y * y)) / base;
+		}
+	}
+}
+
+void Library::BilateralColorTemp(float* const temp, C_FLOAT sigma)
+{
+	C_FLOAT base = -2.0f * sigma * sigma;
+
+	for (int32_t index = 0; index < 256; index++)
+	{
+		temp[index] = exp((index * index) / base);
+	}
+}
+
+void Library::Histogram8bit(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height)
+{
+	int32_t* histogram = new int32_t[256]{ 0 };
+	int32_t max = 0;
+
+	SetHistogram8bit(src, histogram, width, height);
+	SetNormalizedHistogram8bit(histogram, 256, 255);
+
+
+	Image purImage(pur, 256, 256, MNDT::GRAY_8BIT);
+
+	for (UINT32 index = 0; index < 256; index++)
+	{
+		Point start(index, (255 - histogram[index]));
+		Point end(index, 255);
+
+		MNDT::DrawLine8bit(purImage, start, end);
+	}
+
+	delete[] histogram;
+}
+
+void Library::SetHistogram8bit(C_UCHAE* src, int32_t* histogram
+	, C_UINT32 width, C_UINT32 height)
+{
+	C_UINT32 size = width * height;
+
+	for (UINT32 count = 0; count < size; count++)
+	{
+		histogram[*src]++;
+		src++;
+	}
+}
+
+void Library::SetHistogram8bit(C_UCHAE* src, int32_t* histogram
+	, C_UINT32 width, C_UINT32 height
+	, C_UCHAE minRange, C_UCHAE maxRange
+	, C_UCHAE bin)
+{
+	assert(maxRange > minRange);
+
+	C_UCHAE diffRange = maxRange - minRange;
+	C_UCHAE interval = diffRange / bin;
+	C_UINT32 size = width * height;
+
+	for (UINT32 count = 0; count < size; count++)
+	{
+		histogram[*(src + count) / interval]++;
+	}
+}
+
+void Library::SetNormalizedHistogram8bit(int32_t* histogram
+	, C_UINT32 size
+	, C_UCHAE base)
+{
+	int32_t max = 0;
+
+	for (UINT32 index = 0; index < size; index++)
+	{
+		max = max < histogram[index] ? histogram[index] : max;
+	}
+
+
+	float normalizedBase = static_cast<float>(base) / max;
+
+	for (UINT32 index = 0; index < size; index++)
+	{
+		histogram[index] = static_cast<int32_t>(histogram[index] * normalizedBase);
+	}
+}
+
+void Library::HistogramEqualization8bit(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height)
+{
+	C_UINT32 size = width * height;
+	int32_t* histogram = new int32_t[256]{ 0 };
+
+	SetHistogram8bit(src, histogram, width, height);
+
+
+	float base = 0;
+
+	for (UINT32 index = 0; index < 256; index++)
+	{
+		if (histogram[index] > 0)
+		{
+			base += static_cast<float>(histogram[index]) / static_cast<float>(size);
+			histogram[index] = static_cast<int32_t>(base * 255);
+		}
+	}
+
+	for (UINT32 index = 0; index < size; index++)
+	{
+		*(pur + index) = histogram[*(src + index)];
+	}
+
+	delete[] histogram;
+}
+
+double Library::CompareHistogram(C_UCHAE* src, C_UCHAE* pur
+	, C_UINT32 width, C_UINT32 height)
+{
+	int32_t* srcHistogram = new int32_t[256]{ 0 };
+	int32_t* purHistogram = new int32_t[256]{ 0 };
+
+	SetHistogram8bit(src, srcHistogram, width, height);
+	SetHistogram8bit(pur, purHistogram, width, height);
+
+	int32_t diff = 0;
+
+	for (UINT32 index = 0; index < 256; index++)
+	{
+		diff += abs(srcHistogram[index] - purHistogram[index]);
+	}
+
+	return 1.0 - static_cast<double>(diff) / static_cast<double>(width * height);
+}
+
+void Library::Channel(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height
+	, C_UINT32 channel)
+{
+	assert(src != nullptr && pur != nullptr);
+	assert(width > 0 && height > 0);
+	assert(channel > 0 && channel < 4);
+
+	C_UCHAE* purEnd = pur + width * height + 1;
+
+	src += (channel - 1);
+
+	while (pur < purEnd)
+	{
+		*pur = *src;
+		pur++;
+		src += 3;
+	}
+}
+
+void Library::BackProjection(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height
+	, C_UINT32* histogram
+	, C_UCHAE minRange, C_UCHAE maxRange
+	, C_UCHAE bin)
+{
+	assert(src != nullptr && pur != nullptr);
+	assert(width > 0 && height > 0);
+
+	C_UCHAE* purEnd = pur + width * height + 1;
+	C_UCHAE diffRange = maxRange - minRange;
+	C_UCHAE interval = diffRange / bin;
+
+
+	while (pur < purEnd)
+	{
+		*pur = histogram[(*src) / interval];
+		pur++;
+		src++;
+	}
+}
+
+//void Library::BackProjection(C_UCHAE* src, UCHAE* pur
+//	, C_UINT32 srcWidth, C_UINT32 srcHeight
+//	, C_UCHAE* hisSrc
+//	, C_UINT32 hisWidth, C_UINT32 hisHeight
+//	, C_UINT32 minRange, C_UINT32 maxRange
+//	, C_UINT32 bin)
+//{
+//	assert(src != nullptr && pur != nullptr);
+//	assert(srcWidth > 0 && srcHeight > 0);
+//	assert(maxRange > minRange && minRange >= 0 && maxRange <= 256);
+//	assert(bin > 0 && bin <= 256);
+//
+//	int32_t* histogram = new int32_t[bin]{ 0 };
+//
+//	SetHistogram8bit(hisSrc, histogram
+//		, hisWidth, hisHeight
+//		, minRange, maxRange
+//		, bin);
+//
+//	SetNormalizedHistogram8bit(histogram
+//		, bin
+//		, maxRange);
+//
+//
+//	C_UCHAE* purEnd = pur + srcWidth * srcHeight + 1;
+//	C_UCHAE diffRange = maxRange - minRange;
+//	C_UCHAE interval = diffRange / bin;
+//
+//
+//	while (pur < purEnd)
+//	{
+//		*pur = histogram[(*src) / interval];
+//		pur++;
+//		src++;
+//	}
+//}
+
+void Library::MeanShift(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height
+	, C_UINT32* rectPoint
+	, C_UINT32 times
+	, C_DOUBLE threshold)
+{
+	assert(src != nullptr && pur != nullptr);
+	assert(width > 0 && height > 0);
+
+	memcpy(pur, src, width * height * sizeof(UCHAE));
+
+	Image srcImage(const_cast<UCHAE*>(src), width, height, ColerType::BGR2GRAY_8BIT);
+	Image purImage(const_cast<UCHAE*>(pur), width, height, ColerType::BGR2GRAY_8BIT);
+	Rect rect(rectPoint[0], rectPoint[1], rectPoint[2], rectPoint[3]);
+
+	MNDT::DrawRect8bit(purImage, rect);
+
+	for (UINT32 time = 0; time < times; time++)
+	{
+		C_UINT32 endX = rect.EndX();
+		C_UINT32 endY = rect.EndY();
+
+		int32_t centerX = (rect.Width() >> 1) + rect.X();
+		int32_t centerY = (rect.Height() >> 1) + rect.Y();
+		int32_t sumX = 0;
+		int32_t sumY = 0;
+		int32_t sumBase = 0;
+
+		for (UINT32 y = rect.Y(); y < endY; y++)
+		{
+			for (UINT32 x = rect.X(); x < endX; x++)
+			{
+				if (srcImage.image[y][x] > 0)
+				{
+					C_INT32 xDiff = x - centerX;
+					C_INT32 yDiff = y - centerY;
+
+					sumX += (xDiff * srcImage.image[y][x]);
+					sumY += (yDiff * srcImage.image[y][x]);
+					sumBase += srcImage.image[y][x];
+				}
+			}
+		}
+
+		C_DOUBLE offsetX = (static_cast<double>(sumX) / static_cast<double>(sumBase));
+		C_DOUBLE offsetY = (static_cast<double>(sumY) / static_cast<double>(sumBase));
+		int32_t updateX = rect.X() + static_cast<int32_t>(offsetX);
+		int32_t updateY = rect.Y() + static_cast<int32_t>(offsetY);
+
+		updateX = std::min(std::max(updateX, 0), static_cast<int32_t>(width - 1));
+		updateY = std::min(std::max(updateY, 0), static_cast<int32_t>(height - 1));
+
+		rect.X(updateX);
+		rect.Y(updateY);
+
+		// loss
+		if ((offsetX * offsetX + offsetY * offsetY) <= threshold) break;
+	}
+
+	MNDT::DrawRect8bit(purImage, rect);
+}
+
+void Library::Threshold8bit(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height
+	, C_UINT32 thresh)
+{
+	assert(src != nullptr && pur != nullptr);
+	assert(width > 0 && height > 0);
+
+	C_UCHAE* purEnd = pur + width * height + 1;
+
+	while (pur < purEnd)
+	{
+		if (*src < thresh)
+		{
+			*pur = 0;
+		}
+		else
+		{
+			*pur = 255;
+		}
+		pur++;
+		src++;
 	}
 }

@@ -10,14 +10,14 @@ using System.Windows.Forms;
 
 namespace MNDTVisualization
 {
-    public partial class Form1 : Form
+    public partial class MNDT : Form
     {
         MNDTLibrary _lib = new MNDTLibrary();
-        private static string FILE_NAME = @"C:\Users\Ghost\Desktop\Lenna.jpg";
+        private static string FILE_NAME = @"C:\Users\Ghost\Desktop\Lenna3.jpg";
         private Bitmap _fileImage = new Bitmap(FILE_NAME);
         private Bitmap _nowImage = new Bitmap(FILE_NAME);
 
-        public Form1()
+        public MNDT()
         {
             InitializeComponent();
             pic_src.Image = _fileImage;
@@ -97,10 +97,10 @@ namespace MNDTVisualization
 
         private void track_hsv_Scroll(object sender, EventArgs e)
         {
-            
+
             string numericName = ((TrackBar)sender).Name.Replace("track", "numeric");
             NumericUpDown numericObj = Controls.Find(numericName, true).FirstOrDefault() as NumericUpDown;
-            if(numericObj != null)
+            if (numericObj != null)
             {
                 numericObj.Value = ((TrackBar)sender).Value;
             }
@@ -159,5 +159,111 @@ namespace MNDTVisualization
             UpdateYCbCrAppPic();
         }
 
+        private void btn_padding_Click(object sender, EventArgs e)
+        {
+            Bitmap bitmap = _lib.ImagePadding8bit(_nowImage, 30);
+            SetCombinationImage(bitmap, "Padding");
+
+            bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
+            pic_pur.Image = _lib.ImagePadding8bit(bitmap, 10);
+        }
+
+        private void btn_blur_Click(object sender, EventArgs e)
+        {
+            Bitmap bitmap = _lib.Blur8bit(_nowImage, 2);
+            SetCombinationImage(bitmap, "Blur");
+
+            bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
+            pic_pur.Image = _lib.Blur8bit(bitmap, 3);
+        }
+
+        private void btn_gauss_blur_Click(object sender, EventArgs e)
+        {
+            Bitmap bitmap = _lib.BlurGauss8bit(_nowImage, 3, 1);
+            SetCombinationImage(bitmap, "GaussBlur");
+
+            bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
+            pic_pur.Image = _lib.BlurGauss8bit(bitmap, 3, 1);
+        }
+
+        private void btn_median_blur_Click(object sender, EventArgs e)
+        {
+            Bitmap bitmap = _lib.MedianBlur8bit(_nowImage, 5);
+            SetCombinationImage(bitmap, "MedianBlur");
+
+            bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
+            pic_pur.Image = _lib.MedianBlur8bit(bitmap, 5);
+        }
+
+        private void btn_bilateral_Click(object sender, EventArgs e)
+        {
+            Bitmap bitmap = _lib.BilateralBlur8bit(_nowImage, 30, 30, 21);
+            SetCombinationImage(bitmap, "BilateralBlur");
+
+
+            bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
+            pic_pur.Image = _lib.BilateralBlur8bit(bitmap, 30, 30, 21);
+        }
+
+        private void btn_histogram_Click(object sender, EventArgs e)
+        {
+            Bitmap bitmap = _lib.Histogram8bit(_nowImage);
+            SetCombinationImage(bitmap, "Histogram");
+
+
+            bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
+            pic_pur.Image = _lib.Histogram8bit(bitmap);
+        }
+
+        private void btn_hisogram_equalization_Click(object sender, EventArgs e)
+        {
+            Bitmap bitmap = _lib.HistogramEqualization8bit(_nowImage);
+            SetCombinationImage(bitmap, "HistogramEqualization");
+
+
+            bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
+            pic_pur.Image = _lib.HistogramEqualization8bit(bitmap);
+        }
+
+        private void btn_back_projection_Click(object sender, EventArgs e)
+        {
+            string hisPath = @"C:\Users\Ghost\Desktop\Lenn.jpg";
+            Bitmap hisImage = new Bitmap(hisPath);
+            
+            new ImageForm(hisImage, "HistogramImage").Show();
+
+            hisImage = _lib.ChangeColor(hisImage, ColerType.BGR2HSV);
+            hisImage = _lib.Channel(hisImage);
+            
+            new ImageForm(hisImage, "HistogramImageHChannel").Show();
+
+            Bitmap bitmap = _lib.BackProjection(_nowImage, hisImage, 180);
+            SetCombinationImage(bitmap, "BackProject");
+        }
+
+        private void btn_channel_Click(object sender, EventArgs e)
+        {
+            Bitmap bitmap = _lib.Channel(_nowImage);
+            SetCombinationImage(bitmap, "Channel");
+            
+            pic_pur.Image = _lib.Channel(_fileImage);
+        }
+
+        private void btn_threshold_Click(object sender, EventArgs e)
+        {
+            Bitmap bitmap = _lib.Threshold8bit(_nowImage, 65);
+            SetCombinationImage(bitmap, "Threshold");
+            
+            bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
+            pic_pur.Image = _lib.Threshold8bit(bitmap, 65);
+        }
+
+        private void btn_meanshift_Click(object sender, EventArgs e)
+        {
+            int[] rectPoint = { 196, 195, 80, 102 };
+            Bitmap bitmap = _lib.MeanShift(_nowImage, rectPoint, 30, 0.01);
+            SetCombinationImage(bitmap, "MeanShift");
+
+        }
     }
 }

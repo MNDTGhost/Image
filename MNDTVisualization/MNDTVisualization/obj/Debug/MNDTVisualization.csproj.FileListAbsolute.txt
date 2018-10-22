@@ -8,4 +8,5 @@ D:\Visual Studio 2013 Project\Projects\MNDTVisualization\MNDTVisualization\obj\D
 D:\Visual Studio 2013 Project\Projects\MNDTVisualization\MNDTVisualization\obj\Debug\MNDTVisualization.pdb
 D:\Visual Studio 2013 Project\Projects\MNDTVisualization\MNDTVisualization\bin\Debug\MNDTLibrary.dll
 D:\Visual Studio 2013 Project\Projects\MNDTVisualization\MNDTVisualization\bin\Debug\MNDTLibrary.pdb
-D:\Visual Studio 2013 Project\Projects\MNDTVisualization\MNDTVisualization\obj\Debug\MNDTVisualization.Form1.resources
+D:\Visual Studio 2013 Project\Projects\MNDTVisualization\MNDTVisualization\obj\Debug\MNDTVisualization.MNDT.resources
+D:\Visual Studio 2013 Project\Projects\MNDTVisualization\MNDTVisualization\obj\Debug\MNDTVisualization.ImageForm.resources

@@ -151,11 +151,16 @@
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="Library.cpp" />
     <ClCompile Include="MNDTLibrary.cpp" />
+    <ClCompile Include="Point.cpp" />
+    <ClCompile Include="Rect.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="draw.h" />
     <ClInclude Include="general.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="Library.h" />
+    <ClInclude Include="Point.h" />
+    <ClInclude Include="Rect.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

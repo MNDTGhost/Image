@@ -1,20 +1,25 @@
 #include "Image.h"
 
-Image::Image(UCHAE* src, C_UINT32 width, C_UINT32 height)
+Image::Image(UCHAE* src
+	, C_UINT32 width, C_UINT32 height
+	, C_UINT32 type)
 {
 	_width = width;
 	_height = height;
-	image = new UCHAE*[_height];
+	_type = static_cast<MNDT::ImageType>(type);
 
-	for (UINT32 index = 0; index < _height; index++)
+	image = new UCHAE*[height];
+
+	for (UINT32 index = 0; index < height; index++)
 	{
-		*(image + index) = (src + _width * index);
+		*(image + index) = (src + width * index);
 	}
 }
 
 Image::~Image()
 {
-	MNDT::DeletePtr(&image);
+	delete[] image;
+	image = nullptr;
 }
 
 UINT32 Image::Width() const 

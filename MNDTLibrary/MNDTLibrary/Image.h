@@ -6,7 +6,16 @@
 class Image
 {
 public:
-	Image(UCHAE* src, C_UINT32 width, C_UINT32 height);
+	/*
+		Image Parameter:
+		src			= source of image
+		width		= Image width
+		height		= Image height
+		type		= Image type
+	*/
+	Image(UCHAE* src
+		, C_UINT32 width, C_UINT32 height
+		, C_UINT32 type);
 
 	~Image();
 
@@ -14,9 +23,9 @@ public:
 
 	UINT32 Height() const;
 
-
 	UCHAE** image;
 private:
+	MNDT::ImageType _type;
 	UINT32 _width;
 	UINT32 _height;
 };

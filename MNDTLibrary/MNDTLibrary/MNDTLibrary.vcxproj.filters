@@ -27,6 +27,12 @@
     <ClCompile Include="general.cpp">
       <Filter>資源檔</Filter>
     </ClCompile>
+    <ClCompile Include="Point.cpp">
+      <Filter>資源檔</Filter>
+    </ClCompile>
+    <ClCompile Include="Rect.cpp">
+      <Filter>資源檔</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library.h">
@@ -36,6 +42,15 @@
       <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="Image.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="draw.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Point.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Rect.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
   </ItemGroup>

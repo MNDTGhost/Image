@@ -1,6 +1,6 @@
 ﻿namespace MNDTVisualization
 {
-    partial class Form1
+    partial class MNDT
     {
         /// <summary>
         /// 設計工具所需的變數。
@@ -38,6 +38,20 @@
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.btn_YCbCr2BGR = new System.Windows.Forms.Button();
             this.btn_BGR2YCbCr = new System.Windows.Forms.Button();
+            this.tabPage5 = new System.Windows.Forms.TabPage();
+            this.btn_bilateral = new System.Windows.Forms.Button();
+            this.btn_median_blur = new System.Windows.Forms.Button();
+            this.btn_gauss_blur = new System.Windows.Forms.Button();
+            this.btn_blur = new System.Windows.Forms.Button();
+            this.tabPage6 = new System.Windows.Forms.TabPage();
+            this.btn_channel = new System.Windows.Forms.Button();
+            this.btn_back_projection = new System.Windows.Forms.Button();
+            this.btn_hisogram_equalization = new System.Windows.Forms.Button();
+            this.btn_histogram = new System.Windows.Forms.Button();
+            this.tabPage7 = new System.Windows.Forms.TabPage();
+            this.btn_threshold = new System.Windows.Forms.Button();
+            this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.btn_padding = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -75,11 +89,16 @@
             this.track_ycbcr_cb = new System.Windows.Forms.TrackBar();
             this.label15 = new System.Windows.Forms.Label();
             this.label16 = new System.Windows.Forms.Label();
+            this.btn_meanshift = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pic_src)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pic_pur)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pic_now)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            this.tabPage5.SuspendLayout();
+            this.tabPage6.SuspendLayout();
+            this.tabPage7.SuspendLayout();
+            this.tabPage4.SuspendLayout();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.track_hsv_v)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numeric_hsv_v)).BeginInit();
@@ -162,6 +181,10 @@
             // tabControl1
             // 
             this.tabControl1.Controls.Add(this.tabPage1);
+            this.tabControl1.Controls.Add(this.tabPage5);
+            this.tabControl1.Controls.Add(this.tabPage6);
+            this.tabControl1.Controls.Add(this.tabPage7);
+            this.tabControl1.Controls.Add(this.tabPage4);
             this.tabControl1.Location = new System.Drawing.Point(12, 12);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -204,6 +227,163 @@
             this.btn_BGR2YCbCr.Text = "BGR->YCbCr";
             this.btn_BGR2YCbCr.UseVisualStyleBackColor = true;
             this.btn_BGR2YCbCr.Click += new System.EventHandler(this.btn_BGR2YCbCr_Click);
+            // 
+            // tabPage5
+            // 
+            this.tabPage5.Controls.Add(this.btn_bilateral);
+            this.tabPage5.Controls.Add(this.btn_median_blur);
+            this.tabPage5.Controls.Add(this.btn_gauss_blur);
+            this.tabPage5.Controls.Add(this.btn_blur);
+            this.tabPage5.Location = new System.Drawing.Point(4, 25);
+            this.tabPage5.Name = "tabPage5";
+            this.tabPage5.Size = new System.Drawing.Size(979, 71);
+            this.tabPage5.TabIndex = 2;
+            this.tabPage5.Text = "平滑處理";
+            this.tabPage5.UseVisualStyleBackColor = true;
+            // 
+            // btn_bilateral
+            // 
+            this.btn_bilateral.Location = new System.Drawing.Point(324, 6);
+            this.btn_bilateral.Name = "btn_bilateral";
+            this.btn_bilateral.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.btn_bilateral.Size = new System.Drawing.Size(100, 44);
+            this.btn_bilateral.TabIndex = 7;
+            this.btn_bilateral.Text = "雙邊濾波";
+            this.btn_bilateral.UseVisualStyleBackColor = true;
+            this.btn_bilateral.Click += new System.EventHandler(this.btn_bilateral_Click);
+            // 
+            // btn_median_blur
+            // 
+            this.btn_median_blur.Location = new System.Drawing.Point(218, 6);
+            this.btn_median_blur.Name = "btn_median_blur";
+            this.btn_median_blur.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.btn_median_blur.Size = new System.Drawing.Size(100, 44);
+            this.btn_median_blur.TabIndex = 6;
+            this.btn_median_blur.Text = "中值濾波";
+            this.btn_median_blur.UseVisualStyleBackColor = true;
+            this.btn_median_blur.Click += new System.EventHandler(this.btn_median_blur_Click);
+            // 
+            // btn_gauss_blur
+            // 
+            this.btn_gauss_blur.Location = new System.Drawing.Point(112, 6);
+            this.btn_gauss_blur.Name = "btn_gauss_blur";
+            this.btn_gauss_blur.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.btn_gauss_blur.Size = new System.Drawing.Size(100, 44);
+            this.btn_gauss_blur.TabIndex = 5;
+            this.btn_gauss_blur.Text = "高斯平滑";
+            this.btn_gauss_blur.UseVisualStyleBackColor = true;
+            this.btn_gauss_blur.Click += new System.EventHandler(this.btn_gauss_blur_Click);
+            // 
+            // btn_blur
+            // 
+            this.btn_blur.Location = new System.Drawing.Point(6, 6);
+            this.btn_blur.Name = "btn_blur";
+            this.btn_blur.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.btn_blur.Size = new System.Drawing.Size(100, 44);
+            this.btn_blur.TabIndex = 4;
+            this.btn_blur.Text = "平滑";
+            this.btn_blur.UseVisualStyleBackColor = true;
+            this.btn_blur.Click += new System.EventHandler(this.btn_blur_Click);
+            // 
+            // tabPage6
+            // 
+            this.tabPage6.Controls.Add(this.btn_meanshift);
+            this.tabPage6.Controls.Add(this.btn_channel);
+            this.tabPage6.Controls.Add(this.btn_back_projection);
+            this.tabPage6.Controls.Add(this.btn_hisogram_equalization);
+            this.tabPage6.Controls.Add(this.btn_histogram);
+            this.tabPage6.Location = new System.Drawing.Point(4, 25);
+            this.tabPage6.Name = "tabPage6";
+            this.tabPage6.Size = new System.Drawing.Size(979, 71);
+            this.tabPage6.TabIndex = 3;
+            this.tabPage6.Text = "直方圖";
+            this.tabPage6.UseVisualStyleBackColor = true;
+            // 
+            // btn_channel
+            // 
+            this.btn_channel.Location = new System.Drawing.Point(218, 6);
+            this.btn_channel.Name = "btn_channel";
+            this.btn_channel.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.btn_channel.Size = new System.Drawing.Size(100, 44);
+            this.btn_channel.TabIndex = 11;
+            this.btn_channel.Text = "單個色彩圖像";
+            this.btn_channel.UseVisualStyleBackColor = true;
+            this.btn_channel.Click += new System.EventHandler(this.btn_channel_Click);
+            // 
+            // btn_back_projection
+            // 
+            this.btn_back_projection.Location = new System.Drawing.Point(324, 6);
+            this.btn_back_projection.Name = "btn_back_projection";
+            this.btn_back_projection.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.btn_back_projection.Size = new System.Drawing.Size(100, 44);
+            this.btn_back_projection.TabIndex = 10;
+            this.btn_back_projection.Text = "直方圖反投影";
+            this.btn_back_projection.UseVisualStyleBackColor = true;
+            this.btn_back_projection.Click += new System.EventHandler(this.btn_back_projection_Click);
+            // 
+            // btn_hisogram_equalization
+            // 
+            this.btn_hisogram_equalization.Location = new System.Drawing.Point(112, 6);
+            this.btn_hisogram_equalization.Name = "btn_hisogram_equalization";
+            this.btn_hisogram_equalization.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.btn_hisogram_equalization.Size = new System.Drawing.Size(100, 44);
+            this.btn_hisogram_equalization.TabIndex = 9;
+            this.btn_hisogram_equalization.Text = "直方圖等化";
+            this.btn_hisogram_equalization.UseVisualStyleBackColor = true;
+            this.btn_hisogram_equalization.Click += new System.EventHandler(this.btn_hisogram_equalization_Click);
+            // 
+            // btn_histogram
+            // 
+            this.btn_histogram.Location = new System.Drawing.Point(6, 6);
+            this.btn_histogram.Name = "btn_histogram";
+            this.btn_histogram.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.btn_histogram.Size = new System.Drawing.Size(100, 44);
+            this.btn_histogram.TabIndex = 8;
+            this.btn_histogram.Text = "直方圖";
+            this.btn_histogram.UseVisualStyleBackColor = true;
+            this.btn_histogram.Click += new System.EventHandler(this.btn_histogram_Click);
+            // 
+            // tabPage7
+            // 
+            this.tabPage7.Controls.Add(this.btn_threshold);
+            this.tabPage7.Location = new System.Drawing.Point(4, 25);
+            this.tabPage7.Name = "tabPage7";
+            this.tabPage7.Size = new System.Drawing.Size(979, 71);
+            this.tabPage7.TabIndex = 4;
+            this.tabPage7.Text = "二值化";
+            this.tabPage7.UseVisualStyleBackColor = true;
+            // 
+            // btn_threshold
+            // 
+            this.btn_threshold.Location = new System.Drawing.Point(6, 6);
+            this.btn_threshold.Name = "btn_threshold";
+            this.btn_threshold.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.btn_threshold.Size = new System.Drawing.Size(100, 44);
+            this.btn_threshold.TabIndex = 11;
+            this.btn_threshold.Text = "二值化";
+            this.btn_threshold.UseVisualStyleBackColor = true;
+            this.btn_threshold.Click += new System.EventHandler(this.btn_threshold_Click);
+            // 
+            // tabPage4
+            // 
+            this.tabPage4.Controls.Add(this.btn_padding);
+            this.tabPage4.Location = new System.Drawing.Point(4, 25);
+            this.tabPage4.Name = "tabPage4";
+            this.tabPage4.Size = new System.Drawing.Size(979, 71);
+            this.tabPage4.TabIndex = 1;
+            this.tabPage4.Text = "測試";
+            this.tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // btn_padding
+            // 
+            this.btn_padding.Location = new System.Drawing.Point(6, 6);
+            this.btn_padding.Name = "btn_padding";
+            this.btn_padding.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.btn_padding.Size = new System.Drawing.Size(100, 44);
+            this.btn_padding.TabIndex = 3;
+            this.btn_padding.Text = "填充";
+            this.btn_padding.UseVisualStyleBackColor = true;
+            this.btn_padding.Click += new System.EventHandler(this.btn_padding_Click);
             // 
             // label1
             // 
@@ -600,7 +780,18 @@
             this.label16.TabIndex = 36;
             this.label16.Text = "藍綠";
             // 
-            // Form1
+            // btn_meanshift
+            // 
+            this.btn_meanshift.Location = new System.Drawing.Point(430, 6);
+            this.btn_meanshift.Name = "btn_meanshift";
+            this.btn_meanshift.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.btn_meanshift.Size = new System.Drawing.Size(100, 44);
+            this.btn_meanshift.TabIndex = 12;
+            this.btn_meanshift.Text = "均值飄移";
+            this.btn_meanshift.UseVisualStyleBackColor = true;
+            this.btn_meanshift.Click += new System.EventHandler(this.btn_meanshift_Click);
+            // 
+            // MNDT
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -619,13 +810,17 @@
             this.Controls.Add(this.pic_now);
             this.Controls.Add(this.pic_pur);
             this.Controls.Add(this.pic_src);
-            this.Name = "Form1";
+            this.Name = "MNDT";
             this.Text = "Form1";
             ((System.ComponentModel.ISupportInitialize)(this.pic_src)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pic_pur)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pic_now)).EndInit();
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
+            this.tabPage5.ResumeLayout(false);
+            this.tabPage6.ResumeLayout(false);
+            this.tabPage7.ResumeLayout(false);
+            this.tabPage4.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.track_hsv_v)).EndInit();
@@ -700,6 +895,21 @@
         private System.Windows.Forms.TrackBar track_ycbcr_cb;
         private System.Windows.Forms.Label label15;
         private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.TabPage tabPage4;
+        private System.Windows.Forms.Button btn_padding;
+        private System.Windows.Forms.TabPage tabPage5;
+        private System.Windows.Forms.Button btn_blur;
+        private System.Windows.Forms.Button btn_gauss_blur;
+        private System.Windows.Forms.Button btn_median_blur;
+        private System.Windows.Forms.Button btn_bilateral;
+        private System.Windows.Forms.TabPage tabPage6;
+        private System.Windows.Forms.Button btn_histogram;
+        private System.Windows.Forms.Button btn_hisogram_equalization;
+        private System.Windows.Forms.Button btn_back_projection;
+        private System.Windows.Forms.Button btn_channel;
+        private System.Windows.Forms.TabPage tabPage7;
+        private System.Windows.Forms.Button btn_threshold;
+        private System.Windows.Forms.Button btn_meanshift;
     }
 }
 

@@ -1,14 +1,11 @@
 #pragma once
 #ifndef GENERAL_H
 #define GENERAL_H
+//#define NDEBUG
 #include <fstream>
 #include <string>
 #include <algorithm>
-
-#ifdef DEBUG
 #include <assert.h>
-#endif // DEBUG
-
 
 typedef unsigned char UCHAE;
 typedef const unsigned char C_UCHAE;
@@ -17,20 +14,27 @@ typedef unsigned __int32 UINT32;
 typedef const unsigned __int32 C_UINT32;
 typedef const __int32 C_INT32;
 typedef const double C_DOUBLE;
+typedef const float C_FLOAT;
 
 
 namespace MNDT {
-
-	// 刪除單指標，使用雙重指標指向傳入的指標，直接對原先地址刪除
-	template <class T>
-	inline void DeletePtr(T** ptr)
+	enum ImageType
 	{
-		delete[] ptr;
-		ptr = nullptr;
+		BGR_32BIT = 3,
+		GRAY_8BIT = 1
+	};
+
+	template <typename T>
+	inline void Write(T& data)
+	{
+		std::fstream fwLog;
+
+		fwLog.open(MNDT::LOG_FILE, std::ios::app);
+		fwLog << data;
+		fwLog.close();
 	}
 
-	extern void Write(C_UCHAE* str);
-
 	extern char* LOG_FILE;
+	extern double PI;
 }
 #endif // !GENERAL_H
