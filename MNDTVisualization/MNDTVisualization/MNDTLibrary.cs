@@ -24,6 +24,18 @@ namespace MNDTVisualization
         GAUSS_BLUR = 1
     }
 
+    public enum RotatType : int
+    {
+        HORIZONTAL = 0,
+        VERTICAL = 1
+    }
+
+    public enum ResizeType : int
+    {
+        NEAREST = 0,
+        LINEAR = 1
+    }
+
     class MNDTLibrary
     {
         private const string DLL_PATH = @"D:\Visual Studio 2013 Project\Projects\MNDTLibrary\x64\Debug\MNDTLibrary.dll";
@@ -176,6 +188,33 @@ namespace MNDTVisualization
         }
 
         [DllImport(DLL_PATH)]
+        unsafe private static extern void mndtImagePadding24bit(IntPtr src, IntPtr pur
+            , int width, int height
+            , int pad);
+
+        public Bitmap ImagePadding24bit(Bitmap srcImage, int pad)
+        {
+            Bitmap purImage = new Bitmap(srcImage.Width + pad * 2, srcImage.Height + pad * 2, PixelFormat.Format24bppRgb);
+            Rectangle size = new Rectangle(0, 0, srcImage.Width, srcImage.Height);
+            BitmapData srcData = srcImage.LockBits(size, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+            BitmapData purData = purImage.LockBits(size, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+
+            unsafe
+            {
+                IntPtr srcPtr = srcData.Scan0;
+                IntPtr purPtr = purData.Scan0;
+                mndtImagePadding24bit(srcPtr, purPtr
+                    , srcImage.Width, srcImage.Height
+                    , pad);
+            }
+
+            srcImage.UnlockBits(srcData);
+            purImage.UnlockBits(purData);
+
+            return purImage;
+        }
+
+        [DllImport(DLL_PATH)]
         unsafe private static extern void mndtBlur8bit(IntPtr src, IntPtr pur
             , int width, int height
             , int size);
@@ -227,6 +266,35 @@ namespace MNDTVisualization
             }
 
             purImage.Palette = _colorPalette;
+            srcImage.UnlockBits(srcData);
+            purImage.UnlockBits(purData);
+
+            return purImage;
+        }
+
+        [DllImport(DLL_PATH)]
+        unsafe private static extern void mndtBlurGauss24bit(IntPtr src, IntPtr pur
+            , int width, int height
+            , int size
+            , float sigma);
+
+        public Bitmap BlurGauss24bit(Bitmap srcImage, int gaussSize, float sigma)
+        {
+            Bitmap purImage = new Bitmap(srcImage.Width, srcImage.Height, PixelFormat.Format24bppRgb);
+            Rectangle size = new Rectangle(0, 0, srcImage.Width, srcImage.Height);
+            BitmapData srcData = srcImage.LockBits(size, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+            BitmapData purData = purImage.LockBits(size, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+
+            unsafe
+            {
+                IntPtr srcPtr = srcData.Scan0;
+                IntPtr purPtr = purData.Scan0;
+                mndtBlurGauss24bit(srcPtr, purPtr
+                    , srcImage.Width, srcImage.Height
+                    , gaussSize
+                    , sigma);
+            }
+
             srcImage.UnlockBits(srcData);
             purImage.UnlockBits(purData);
 
@@ -509,6 +577,273 @@ namespace MNDTVisualization
             }
 
             purImage.Palette = _colorPalette;
+            srcImage.UnlockBits(srcData);
+            purImage.UnlockBits(purData);
+
+            return purImage;
+        }
+
+        [DllImport(DLL_PATH)]
+        unsafe private static extern void mndtRotate8bit(IntPtr src, IntPtr pur
+            , int width, int height
+            , int type);
+
+        public Bitmap Rotate8bit(Bitmap srcImage, RotatType type)
+        {
+            Bitmap purImage = new Bitmap(srcImage.Width, srcImage.Height, PixelFormat.Format8bppIndexed);
+            Rectangle size = new Rectangle(0, 0, srcImage.Width, srcImage.Height);
+            BitmapData srcData = srcImage.LockBits(size, ImageLockMode.ReadOnly, PixelFormat.Format8bppIndexed);
+            BitmapData purData = purImage.LockBits(size, ImageLockMode.ReadWrite, PixelFormat.Format8bppIndexed);
+
+            unsafe
+            {
+                IntPtr srcPtr = srcData.Scan0;
+                IntPtr purPtr = purData.Scan0;
+
+                mndtRotate8bit(srcPtr, purPtr
+                    , srcImage.Width, srcImage.Height
+                    , (int)type);
+            }
+
+            purImage.Palette = _colorPalette;
+            srcImage.UnlockBits(srcData);
+            purImage.UnlockBits(purData);
+
+            return purImage;
+        }
+
+        [DllImport(DLL_PATH)]
+        unsafe private static extern void mndtResize8bit(IntPtr src, IntPtr pur
+            , int width, int height
+            , int reWidth, int reHeight
+            , int type);
+
+        public Bitmap Resize8bit(Bitmap srcImage, int reWidth, int reHeight, ResizeType type)
+        {
+            Bitmap purImage = new Bitmap(reWidth, reHeight, PixelFormat.Format8bppIndexed);
+            Rectangle size = new Rectangle(0, 0, srcImage.Width, srcImage.Height);
+            BitmapData srcData = srcImage.LockBits(size, ImageLockMode.ReadOnly, PixelFormat.Format8bppIndexed);
+            BitmapData purData = purImage.LockBits(new Rectangle(0, 0, reWidth, reHeight), ImageLockMode.ReadWrite, PixelFormat.Format8bppIndexed);
+
+            unsafe
+            {
+                IntPtr srcPtr = srcData.Scan0;
+                IntPtr purPtr = purData.Scan0;
+
+                mndtResize8bit(srcPtr, purPtr
+                    , srcImage.Width, srcImage.Height
+                    , reWidth, reHeight
+                    , (int)type);
+            }
+
+            purImage.Palette = _colorPalette;
+            srcImage.UnlockBits(srcData);
+            purImage.UnlockBits(purData);
+            return purImage;
+        }
+
+        [DllImport(DLL_PATH)]
+        unsafe private static extern void mndtPyramidDown8bit(IntPtr src, IntPtr pur
+            , int width, int height);
+
+        public Bitmap PyramidDown8bit(Bitmap srcImage)
+        {
+            Bitmap purImage = new Bitmap(srcImage.Width >> 1, srcImage.Height >> 1, PixelFormat.Format8bppIndexed);
+            Rectangle size = new Rectangle(0, 0, srcImage.Width, srcImage.Height);
+            BitmapData srcData = srcImage.LockBits(size, ImageLockMode.ReadOnly, PixelFormat.Format8bppIndexed);
+            BitmapData purData = purImage.LockBits(new Rectangle(0, 0, srcImage.Width >> 1, srcImage.Height >> 1), ImageLockMode.ReadWrite, PixelFormat.Format8bppIndexed);
+
+            unsafe
+            {
+                IntPtr srcPtr = srcData.Scan0;
+                IntPtr purPtr = purData.Scan0;
+
+                mndtPyramidDown8bit(srcPtr, purPtr
+                    , srcImage.Width, srcImage.Height);
+            }
+
+            purImage.Palette = _colorPalette;
+            srcImage.UnlockBits(srcData);
+            purImage.UnlockBits(purData);
+
+            return purImage;
+        }
+
+        [DllImport(DLL_PATH)]
+        unsafe private static extern void mndtPyramidUp8bit(IntPtr src, IntPtr pur
+            , int width, int height);
+
+        public Bitmap PyramidUp8bit(Bitmap srcImage)
+        {
+            Bitmap purImage = new Bitmap(srcImage.Width << 1, srcImage.Height << 1, PixelFormat.Format8bppIndexed);
+            Rectangle size = new Rectangle(0, 0, srcImage.Width, srcImage.Height);
+            BitmapData srcData = srcImage.LockBits(size, ImageLockMode.ReadOnly, PixelFormat.Format8bppIndexed);
+            BitmapData purData = purImage.LockBits(new Rectangle(0, 0, srcImage.Width << 1, srcImage.Height << 1), ImageLockMode.ReadWrite, PixelFormat.Format8bppIndexed);
+
+            unsafe
+            {
+                IntPtr srcPtr = srcData.Scan0;
+                IntPtr purPtr = purData.Scan0;
+
+                mndtPyramidUp8bit(srcPtr, purPtr
+                    , srcImage.Width, srcImage.Height);
+            }
+
+            purImage.Palette = _colorPalette;
+            srcImage.UnlockBits(srcData);
+            purImage.UnlockBits(purData);
+
+            return purImage;
+        }
+
+        [DllImport(DLL_PATH)]
+        unsafe private static extern void mndtSetAffineTransform(float[,] affine
+            , float[] baseX, float[] baseY
+            , int row, int col);
+
+
+        [DllImport(DLL_PATH)]
+        unsafe private static extern void mndtAffine8bit(IntPtr src, IntPtr pur
+            , int width, int height
+            , float[] baseX, float[] baseY);
+
+        public Bitmap Affine8bit(Bitmap srcImage)
+        {
+            Bitmap purImage = new Bitmap(srcImage.Width, srcImage.Height, PixelFormat.Format8bppIndexed);
+            Rectangle size = new Rectangle(0, 0, srcImage.Width, srcImage.Height);
+            BitmapData srcData = srcImage.LockBits(size, ImageLockMode.ReadOnly, PixelFormat.Format8bppIndexed);
+            BitmapData purData = purImage.LockBits(new Rectangle(0, 0, srcImage.Width, srcImage.Height), ImageLockMode.ReadWrite, PixelFormat.Format8bppIndexed);
+
+            unsafe
+            {
+                IntPtr srcPtr = srcData.Scan0;
+                IntPtr purPtr = purData.Scan0;
+                float[,] affine = new float[3, 5];
+                float[] baseX = new float[3];
+                float[] baseY = new float[3];
+                //[0] = x, [1] = y, [2] = b's base, [3] = change x, [4] = change y
+                affine[0, 0] = 0;
+                affine[0, 1] = 0;
+                affine[0, 2] = 1;
+                affine[0, 3] = 0;
+                affine[0, 4] = srcImage.Height * 0.3f;
+
+                affine[1, 0] = srcImage.Width - 1;
+                affine[1, 1] = 0;
+                affine[1, 2] = 1;
+                affine[1, 3] = srcImage.Width * 0.8f;
+                affine[1, 4] = 0;
+
+                affine[2, 0] = 0;
+                affine[2, 1] = srcImage.Height - 1;
+                affine[2, 2] = 1;
+                affine[2, 3] = srcImage.Width * 0.1f;
+                affine[2, 4] = srcImage.Height * 0.9f;
+
+                mndtSetAffineTransform(affine
+                    , baseX, baseY
+                    , 3, 5);
+
+                mndtAffine8bit(srcPtr, purPtr
+                    , srcImage.Width, srcImage.Height
+                    , baseX, baseY);
+            }
+
+            purImage.Palette = _colorPalette;
+            srcImage.UnlockBits(srcData);
+            purImage.UnlockBits(purData);
+
+            return purImage;
+        }
+
+        [DllImport(DLL_PATH)]
+        unsafe private static extern void mndtSobel24bit(IntPtr src, IntPtr pur
+            , int width, int height
+            , bool dx, bool dy);
+
+        public Bitmap Sobel24bit(Bitmap srcImage
+            , bool dx, bool dy)
+        {
+            Bitmap purImage = new Bitmap(srcImage.Width, srcImage.Height, PixelFormat.Format24bppRgb);
+            Rectangle size = new Rectangle(0, 0, srcImage.Width, srcImage.Height);
+            BitmapData srcData = srcImage.LockBits(size, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+            BitmapData purData = purImage.LockBits(size, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+
+            unsafe
+            {
+                IntPtr srcPtr = srcData.Scan0;
+                IntPtr purPtr = purData.Scan0;
+
+                mndtSobel24bit(srcPtr, purPtr
+                    , srcImage.Width, srcImage.Height
+                    , dx, dy);
+
+            }
+            
+            srcImage.UnlockBits(srcData);
+            purImage.UnlockBits(purData);
+
+            return purImage;
+        }
+
+        [DllImport(DLL_PATH)]
+        unsafe private static extern void mndtSegmentImage(IntPtr src, IntPtr pur
+            , int width, int height
+            , float sigma, float threshold, int minSize
+            , int* numCss);
+
+        public Bitmap SegmentImage(Bitmap srcImage
+            , float sigma, float threshold, int minSize)
+        {
+            Bitmap purImage = new Bitmap(srcImage.Width, srcImage.Height, PixelFormat.Format24bppRgb);
+            Rectangle size = new Rectangle(0, 0, srcImage.Width, srcImage.Height);
+            BitmapData srcData = srcImage.LockBits(size, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+            BitmapData purData = purImage.LockBits(new Rectangle(0, 0, srcImage.Width, srcImage.Height), ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+            int num = 0;
+            unsafe
+            {
+                IntPtr srcPtr = srcData.Scan0;
+                IntPtr purPtr = purData.Scan0;
+                int* numCss = &num;
+                mndtSegmentImage(srcPtr, purPtr
+                    , srcImage.Width, srcImage.Height
+                    , sigma, threshold, minSize
+                    , numCss);
+                
+            }
+            
+            srcImage.UnlockBits(srcData);
+            purImage.UnlockBits(purData);
+
+            return purImage;
+        }
+
+        [DllImport(DLL_PATH)]
+        unsafe private static extern void mndtSelectiveSearch(IntPtr src, IntPtr pur
+            , int width, int height
+            , float sigma, float threshold, int minSize
+            , int* numCss);
+
+        public Bitmap SelectiveSearch(Bitmap srcImage
+            , float sigma, float threshold, int minSize)
+        {
+            Bitmap purImage = new Bitmap(srcImage.Width, srcImage.Height, PixelFormat.Format24bppRgb);
+            Rectangle size = new Rectangle(0, 0, srcImage.Width, srcImage.Height);
+            BitmapData srcData = srcImage.LockBits(size, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+            BitmapData purData = purImage.LockBits(new Rectangle(0, 0, srcImage.Width, srcImage.Height), ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+            int num = 0;
+            unsafe
+            {
+                IntPtr srcPtr = srcData.Scan0;
+                IntPtr purPtr = purData.Scan0;
+                int* numCss = &num;
+                mndtSelectiveSearch(srcPtr, purPtr
+                    , srcImage.Width, srcImage.Height
+                    , sigma, threshold, minSize
+                    , numCss);
+
+            }
+
             srcImage.UnlockBits(srcData);
             purImage.UnlockBits(purData);
 

@@ -147,20 +147,27 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="draw.cpp" />
+    <ClCompile Include="GaussianElimination.cpp" />
     <ClCompile Include="general.cpp" />
+    <ClCompile Include="GraphTree.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="Library.cpp" />
     <ClCompile Include="MNDTLibrary.cpp" />
     <ClCompile Include="Point.cpp" />
     <ClCompile Include="Rect.cpp" />
+    <ClCompile Include="Segment.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="draw.h" />
+    <ClInclude Include="GaussianElimination.h" />
     <ClInclude Include="general.h" />
+    <ClInclude Include="GraphTree.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="Library.h" />
     <ClInclude Include="Point.h" />
     <ClInclude Include="Rect.h" />
+    <ClInclude Include="Segment.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

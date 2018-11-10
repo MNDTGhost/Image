@@ -4,6 +4,7 @@
 #include "general.h"
 #include "Image.h"
 #include "draw.h"
+#include "GaussianElimination.h"
 
 enum ColerType
 {
@@ -74,6 +75,18 @@ public:
 		, C_INT32 pad);
 
 	/*
+		ImagePadding24bit Parameter:
+		src		= source of image
+		pur		= purpose of image
+		width		= Image's width
+		height		= Image's height
+		pad		= padding size
+	*/
+	void ImagePadding24bit(C_UCHAE* src, UCHAE* pur
+		, C_UINT32 width, C_UINT32 height
+		, C_INT32 pad);
+
+	/*
 		Blur8bit Parameter:
 		src			= source of image
 		pur			= purpose of image
@@ -95,6 +108,19 @@ public:
 		sigma		= gauss temp sigma
 	*/
 	void BlurGauss8bit(C_UCHAE* src, UCHAE* pur
+		, C_UINT32 width, C_UINT32 height
+		, C_UINT32 size, C_FLOAT sigma);
+
+	/*
+		BlurGauss24bit Parameter:
+		src			= source of image
+		pur			= purpose of image
+		width		= Image's width
+		height		= Image's height
+		size		= gauss temp size
+		sigma		= gauss temp sigma
+	*/
+	void BlurGauss24bit(C_UCHAE* src, UCHAE* pur
 		, C_UINT32 width, C_UINT32 height
 		, C_UINT32 size, C_FLOAT sigma);
 
@@ -154,6 +180,12 @@ public:
 		, C_UCHAE minRange, C_UCHAE maxRange
 		, C_UCHAE bin);
 
+	template <class T>
+	void SetHistogram24bit(C_UCHAE* src, T* histogram
+		, C_UINT32 width, C_UINT32 height
+		, C_UINT32 minRange, C_UINT32 maxRange
+		, C_UINT32 bin);
+
 	/*
 		SetNormalizedHistogram8bit Parameter:
 		histogram	= histogram data
@@ -163,6 +195,12 @@ public:
 	void SetNormalizedHistogram8bit(int32_t* histogram
 		, C_UINT32 size
 		, C_UCHAE base);
+
+	void SetNormalizedHistogram8bit(float* histogram
+		, C_UINT32 size);
+
+	void SetNormalizedHistogram24bit(float* histogram
+		, C_UINT32 size);
 
 	/*
 		HistogramEqualization8bit Parameter:
@@ -230,6 +268,91 @@ public:
 		, C_DOUBLE threshold);
 
 	/*
+		Rotate8bit Parameter:
+		src			= source of image
+		pur			= purpose of image
+		width		= Image's width
+		height		= Image's height
+		type		= threshold
+	*/
+	void Rotate8bit(C_UCHAE* src, UCHAE* pur
+		, C_UINT32 width, C_UINT32 height
+		, MNDT::RotateType type);
+
+	/*
+		Resize Parameter:
+		src			= source of image
+		pur			= purpose of image
+		width		= Image's width
+		height		= Image's height
+		reWidth		= new width
+		reHeight	= new height
+		type		= resize type
+	*/
+	void Resize8bit(C_UCHAE* src, UCHAE* pur
+		, C_UINT32 width, C_UINT32 height
+		, C_UINT32 reWidth, C_UINT32 reHeight
+		, C_UINT32 type);
+
+	/*
+		PyramidDown8bit Parameter:
+		src			= source of image
+		pur			= purpose of image
+		width		= Image's width
+		height		= Image's height
+	*/
+	void PyramidDown8bit(C_UCHAE* src, UCHAE* pur
+		, C_UINT32 width, C_UINT32 height);
+
+	/*
+		PyramidUp8bit Parameter:
+		src			= source of image
+		pur			= purpose of image
+		width		= Image's width
+		height		= Image's height
+	*/
+	void PyramidUp8bit(C_UCHAE* src, UCHAE* pur
+		, C_UINT32 width, C_UINT32 height);
+
+	/*
+		SetAffineTransform Parameter:
+		affine		= point input and output
+		baseX		= ouput x base(a.b.c)
+		baseY		= ouput y base(a.b.c)
+		row			= row size
+		col			= col size
+	*/
+	void SetAffineTransform(float** affine
+		, float* baseX, float* baseY
+		, C_UINT32 row, C_UINT32 col);
+
+	/*
+		Affine8bit Parameter:
+		src			= source of image
+		pur			= purpose of image
+		width		= Image's width
+		height		= Image's height
+		baseX		= ouput x base(a.b.c)
+		baseY		= ouput y base(a.b.c)
+	*/
+	void Affine8bit(C_UCHAE* src, UCHAE* pur
+		, C_UINT32 width, C_UINT32 height
+		, C_FLOAT* baseX, C_FLOAT* baseY);
+
+	void Sobel24bit(C_UCHAE* src, int32_t* pur
+		, C_UINT32 width, C_UINT32 height
+		, const bool dx, const bool dy);
+
+	void SobelVisualization24bit(C_UCHAE* src, UCHAE* pur
+		, C_UINT32 width, C_UINT32 height
+		, const bool dx, const bool dy);
+
+	void CartToPolar24bit(C_INT32* Gx, C_INT32* Gy
+		, C_UINT32 width, C_UINT32 height
+		, float* magnitude, float* angle);
+
+
+	/*
 		Threshold8bit Parameter:
 		src			= source of image
 		pur			= purpose of image
@@ -274,7 +397,48 @@ private:
 
 	void BilateralColorTemp(float* const temp, C_FLOAT sigma);
 
+	void RotateHorizontal8bit(C_UCHAE* src, UCHAE* pur
+		, C_UINT32 width, C_UINT32 height);
+
+	void RotateVertical8bit(C_UCHAE* src, UCHAE* pur
+		, C_UINT32 width, C_UINT32 height);
+
+	void NearestResize8bit(C_UCHAE* src, UCHAE* pur
+		, C_UINT32 width, C_UINT32 height
+		, C_UINT32 reWidth, C_UINT32 reHeight);
+
+	void LinearResize8bit(C_UCHAE* src, UCHAE* pur
+		, C_UINT32 width, C_UINT32 height
+		, C_UINT32 reWidth, C_UINT32 reHeight);
+
+	void SetSobelKernels(int32_t* kernels
+		, const bool dx, const bool dy);
 };
 
+template <class T>
+void Library::SetHistogram24bit(C_UCHAE* src, T* histogram
+	, C_UINT32 width, C_UINT32 height
+	, C_UINT32 minRange, C_UINT32 maxRange
+	, C_UINT32 bin)
+{
+	assert(maxRange > minRange);
+
+	C_UCHAE diffRange = maxRange - minRange;
+	C_UCHAE interval = diffRange / bin;
+	C_UINT32 size = width * height;
+	Image srcImage(const_cast<UCHAE*>(src), width, height, MNDT::ImageType::BGR_24BIT);
+
+	for (UINT32 row = 0; row < height; row++)
+	{
+		for (UINT32 col = 0; col < width; col++)
+		{
+			Pixel pix = srcImage.GetPixel(row, col);
+
+			histogram[(pix.B / interval) % bin]++;
+			histogram[(pix.G / interval + bin) % bin]++;
+			histogram[(pix.R / interval + bin + bin) % bin]++;
+		}
+	}
+}
 
 #endif // !LIBRARY_H

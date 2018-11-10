@@ -50,3 +50,18 @@ UINT32 Rect::EndY() const
 {
 	return _y + _height;
 }
+
+UINT32 Rect::Area() const
+{
+	return _width * _height;
+}
+
+Rect operator|(const Rect& rect1, const Rect& rect2)
+{
+	C_UINT32 minX = std::min(rect1.X(), rect2.X());
+	C_UINT32 minY = std::min(rect1.Y(), rect2.Y());
+	C_UINT32 maxX = std::max(rect1.EndX(), rect2.EndX());
+	C_UINT32 maxY = std::max(rect1.EndY(), rect2.EndY());
+
+	return Rect(minX, minY, maxX - minX, maxY - minY);
+}

@@ -13,7 +13,7 @@ namespace MNDTVisualization
     public partial class MNDT : Form
     {
         MNDTLibrary _lib = new MNDTLibrary();
-        private static string FILE_NAME = @"C:\Users\Ghost\Desktop\Lenna3.jpg";
+        private static string FILE_NAME = @"C:\Users\Ghost\Desktop\Lenna.jpg";
         private Bitmap _fileImage = new Bitmap(FILE_NAME);
         private Bitmap _nowImage = new Bitmap(FILE_NAME);
 
@@ -264,6 +264,88 @@ namespace MNDTVisualization
             Bitmap bitmap = _lib.MeanShift(_nowImage, rectPoint, 30, 0.01);
             SetCombinationImage(bitmap, "MeanShift");
 
+        }
+
+        private void btn_horizontal_Click(object sender, EventArgs e)
+        {
+            Bitmap bitmap = _lib.Rotate8bit(_nowImage, RotatType.HORIZONTAL);
+            SetCombinationImage(bitmap, "Horizontal");
+
+            bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
+            pic_pur.Image = _lib.Rotate8bit(bitmap, RotatType.HORIZONTAL);
+        }
+
+        private void btn_vertical_Click(object sender, EventArgs e)
+        {
+            Bitmap bitmap = _lib.Rotate8bit(_nowImage, RotatType.VERTICAL);
+            SetCombinationImage(bitmap, "Vertical");
+
+            bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
+            pic_pur.Image = _lib.Rotate8bit(bitmap, RotatType.VERTICAL);
+        }
+
+        private void btn_nearest_Click(object sender, EventArgs e)
+        {
+            Bitmap bitmap = _lib.Resize8bit(_nowImage, 200, 300, ResizeType.NEAREST);
+            SetCombinationImage(bitmap, "Nearest");
+
+            bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
+            pic_pur.Image = _lib.Resize8bit(bitmap, 200, 300, ResizeType.NEAREST);
+        }
+
+        private void btn_linear_Click(object sender, EventArgs e)
+        {
+            Bitmap bitmap = _lib.Resize8bit(_nowImage, 200, 300, ResizeType.LINEAR);
+            SetCombinationImage(bitmap, "Linear");
+
+            bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
+            pic_pur.Image = _lib.Resize8bit(bitmap, 200, 300, ResizeType.LINEAR);
+            
+        }
+
+        private void btn_pyramid_down_Click(object sender, EventArgs e)
+        {
+            Bitmap bitmap = _lib.PyramidDown8bit(_nowImage);
+            SetCombinationImage(bitmap, "PyramidDown");
+
+            bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
+            pic_pur.Image = _lib.PyramidDown8bit(bitmap);
+        }
+
+        private void btn_pyramid_up_Click(object sender, EventArgs e)
+        {
+            Bitmap bitmap = _lib.PyramidUp8bit(_nowImage);
+            SetCombinationImage(bitmap, "PyramidUp");
+
+            bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
+            pic_pur.Image = _lib.PyramidUp8bit(bitmap);
+        }
+
+        private void btn_affine_Click(object sender, EventArgs e)
+        {
+            Bitmap bitmap = _lib.Affine8bit(_nowImage);
+            SetCombinationImage(bitmap, "Affine");
+
+            bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
+            pic_pur.Image = _lib.Affine8bit(bitmap);
+        }
+
+        private void btn_test_Click(object sender, EventArgs e)
+        {
+            float sigma = 0.7f;
+            float threshold = 100f;
+            int minSize = 100;
+            pic_pur.Image = _lib.SelectiveSearch(_fileImage, sigma, threshold, minSize);
+            //pic_pur.Image = _lib.SegmentImage(_fileImage, sigma, threshold, minSize);
+        }
+
+        private void btn_24bit_sobel_Click(object sender, EventArgs e)
+        {
+            Bitmap bitmap = _lib.Sobel24bit(_nowImage, true, false);
+            SetCombinationImage(bitmap, "24bitSobel");
+            new ImageForm(_lib.Sobel24bit(_fileImage, true, false), "24bitSobel dx").Show();
+            new ImageForm(_lib.Sobel24bit(_fileImage, false, true), "24bitSobel dy").Show();
+            pic_pur.Image = _lib.Sobel24bit(_fileImage, true, false);
         }
     }
 }

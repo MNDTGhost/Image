@@ -1,10 +1,11 @@
 #pragma once
 #ifndef GENERAL_H
 #define GENERAL_H
-//#define NDEBUG
 #include <fstream>
 #include <string>
 #include <algorithm>
+
+//#define NDEBUG
 #include <assert.h>
 
 typedef unsigned char UCHAE;
@@ -20,8 +21,20 @@ typedef const float C_FLOAT;
 namespace MNDT {
 	enum ImageType
 	{
-		BGR_32BIT = 3,
+		BGR_24BIT = 3,
 		GRAY_8BIT = 1
+	};
+
+	enum RotateType
+	{
+		HORIZONTAL,
+		VERTICAL
+	};
+
+	enum ResizeType
+	{
+		NEAREST,
+		LINEAR
 	};
 
 	template <typename T>

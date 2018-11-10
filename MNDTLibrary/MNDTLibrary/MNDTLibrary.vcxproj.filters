@@ -13,6 +13,18 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="標頭檔\Tool">
+      <UniqueIdentifier>{bf9f241a-9437-40d4-a86c-4ca4295c1254}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="資源檔\Tool">
+      <UniqueIdentifier>{40fc6fab-0f16-4ed5-9784-815150e73a5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="標頭檔\Segment">
+      <UniqueIdentifier>{4888328a-7cc9-41b1-bd1b-1c07caf39881}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="資源檔\Segment">
+      <UniqueIdentifier>{166a2ee5-cd23-44ac-a07b-5d164ab4e554}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MNDTLibrary.cpp">
@@ -33,6 +45,18 @@
     <ClCompile Include="Rect.cpp">
       <Filter>資源檔</Filter>
     </ClCompile>
+    <ClCompile Include="draw.cpp">
+      <Filter>資源檔</Filter>
+    </ClCompile>
+    <ClCompile Include="GaussianElimination.cpp">
+      <Filter>資源檔\Tool</Filter>
+    </ClCompile>
+    <ClCompile Include="Segment.cpp">
+      <Filter>資源檔\Segment</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphTree.cpp">
+      <Filter>資源檔\Segment</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library.h">
@@ -52,6 +76,15 @@
     </ClInclude>
     <ClInclude Include="Rect.h">
       <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="GaussianElimination.h">
+      <Filter>標頭檔\Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="Segment.h">
+      <Filter>標頭檔\Segment</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphTree.h">
+      <Filter>標頭檔\Segment</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
