@@ -1,6 +1,8 @@
 #ifdef MNDTLIBRARY_EXPORTS
 #define MNDTLIBRARY_API __declspec(dllexport)
 #include "Library.h"
+#include "LBP.h"
+#include "HOG.h"
 #include "Segment.h"
 
 extern "C" MNDTLIBRARY_API void mndtWrite(C_UCHAE* msg)
@@ -223,7 +225,7 @@ extern "C" MNDTLIBRARY_API void mndtResize8bit(C_UCHAE* src, UCHAE* pur
 	lib.Resize8bit(src, pur
 		, width, height
 		, reWidth, reHeight
-		, type);
+		, (MNDT::ResizeType)type);
 }
 
 extern "C" MNDTLIBRARY_API void mndtPyramidDown8bit(C_UCHAE* src, UCHAE* pur
@@ -290,6 +292,14 @@ extern "C" MNDTLIBRARY_API void mndtSobel24bit(C_UCHAE* src, UCHAE* pur
 		, dx, dy);
 }
 
+extern "C" MNDTLIBRARY_API void mndtSobelEdge8bit(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height)
+{
+	Library lib;
+	lib.SobelEdgeView8bit(src, pur
+		, width, height);
+}
+
 extern "C" MNDTLIBRARY_API void mndtSegmentImage(C_UCHAE* src, UCHAE* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_FLOAT sigma, C_FLOAT threshold, C_UINT32 minSize
@@ -325,6 +335,178 @@ extern "C" MNDTLIBRARY_API void mndtSelectiveSearch(C_UCHAE* src, UCHAE* pur
 		, sigma, threshold, minSize);
 }
 
+extern "C" MNDTLIBRARY_API void mndtOriginalLBP(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height)
+{
+	LBP lbp;
+
+	lbp.OriginalLBP(src, pur
+		, width, height);
+}
+
+extern "C" MNDTLIBRARY_API void mndtCircularLBP(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height)
+{
+	LBP lbp;
+
+	lbp.CircularLBP(src, pur
+		, width, height);
+}
+
+extern "C" MNDTLIBRARY_API void mndtInvariantLBP(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height)
+{
+	LBP lbp;
+
+	lbp.InvariantLBP(src, pur
+		, width, height);
+}
+
+extern "C" MNDTLIBRARY_API void mndtEquivalentLBP(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height)
+{
+	LBP lbp;
+
+	lbp.EquivalentLBP(src, pur
+		, width, height);
+}
+
+extern "C" MNDTLIBRARY_API void mndtMultiScaleBlockLBP(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height)
+{
+	LBP lbp;
+
+	lbp.MultiScaleBlockLBP(src, pur
+		, width, height);
+}
+
+extern "C" MNDTLIBRARY_API void mndtSEMultiScaleBlockLBP(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height)
+{
+	LBP lbp;
+
+	lbp.SEMultiScaleBlockLBP(src, pur
+		, width, height);
+}
+
+extern "C" MNDTLIBRARY_API void mndtLBPHistogram(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height
+	, C_UINT32 gridX, C_UINT32 gridY
+	, C_UINT32 bin)
+{
+	LBP lbp;
+
+	lbp.LBPHistogram(src, pur
+		, width, height
+		, gridX, gridY
+		, bin);
+}
+
+extern "C" MNDTLIBRARY_API void mndtGamma(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height
+	, C_DOUBLE gamma)
+{
+	Library lib;
+
+	lib.Gamma8bit(src, pur
+		, width, height
+		, gamma);
+}
+
+extern "C" MNDTLIBRARY_API void mndtHOGGradient(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height)
+{
+	HOG hog;
+
+	hog.GradienView(src, pur
+		, width, height);
+}
+
+extern "C" MNDTLIBRARY_API void mndtHOGCellHistogram(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height
+	, C_UINT32 cellX, C_UINT32 cellY)
+{
+	HOG hog;
+
+	float* histogram = new float[hog.CellHisTotalSize(width, height)]{ 0 };
+
+	hog.CellHistogram(src, width, height
+		, histogram);
+
+	delete[] histogram;
+	histogram = nullptr;
+}
+
+extern "C" MNDTLIBRARY_API void mndtHOGBlockHistogram(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height
+	, C_UINT32 cellX, C_UINT32 cellY
+	, C_UINT32 blockX, C_UINT32 blockY)
+{
+	HOG hog;
+	float* histogram = new float[hog.BlockHisTotalSize(width, height)]{ 0 };
+
+	hog.BlockHistogram(src, width, height
+		, histogram);
+
+	delete[] histogram;
+	histogram = nullptr;
+}
+
+
+extern "C" MNDTLIBRARY_API void mndtHOGView(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height
+	, C_UINT32 cellX, C_UINT32 cellY
+	, C_UINT32 blockX, C_UINT32 blockY)
+{
+	HOG hog(cellX, cellY, blockX, blockY);
+
+	hog.HOGBlockView(src, pur
+		, width, height);
+}
+
+extern "C" MNDTLIBRARY_API void mndtHOGCellView(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height
+	, C_UINT32 cellX, C_UINT32 cellY)
+{
+	HOG hog(cellX, cellY);
+
+	hog.HOGCellView(src, pur
+		, width, height);
+}
+
+extern "C" MNDTLIBRARY_API void mndtHOGBlockView(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height
+	, C_UINT32 cellX, C_UINT32 cellY
+	, C_UINT32 blockX, C_UINT32 blockY)
+{
+	HOG hog(cellX, cellY, blockX, blockY);
+
+	hog.HOGBlockView(src, pur
+		, width, height);
+}
+
+
+extern "C" MNDTLIBRARY_API void mndtHoughLines(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height
+	, C_FLOAT rho, C_FLOAT theta, C_UINT32 threshold)
+{
+	Library lib;
+
+	lib.HoughLines(src, pur
+		, width, height
+		, rho, theta, threshold);
+}
+
+extern "C" MNDTLIBRARY_API void mndtHoughCircles(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height
+	, C_FLOAT minRadius, C_FLOAT maxRadius, C_UINT32 threshold)
+{
+	Library lib;
+
+	lib.HoughCircles(src, pur
+		, width, height
+		, minRadius, maxRadius, threshold);
+}
 
 #else
 #define MNDTLIBRARY_API __declspec(dllimport)

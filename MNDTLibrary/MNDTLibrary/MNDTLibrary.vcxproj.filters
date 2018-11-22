@@ -25,6 +25,12 @@
     <Filter Include="資源檔\Segment">
       <UniqueIdentifier>{166a2ee5-cd23-44ac-a07b-5d164ab4e554}</UniqueIdentifier>
     </Filter>
+    <Filter Include="資源檔\Feature">
+      <UniqueIdentifier>{7b2fa3cc-1427-4b40-84f0-fc140d5e8f6a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="標頭檔\Feature">
+      <UniqueIdentifier>{5c8c492b-c9c9-4239-9e8a-029bcbbb2dd1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MNDTLibrary.cpp">
@@ -57,6 +63,12 @@
     <ClCompile Include="GraphTree.cpp">
       <Filter>資源檔\Segment</Filter>
     </ClCompile>
+    <ClCompile Include="LBP.cpp">
+      <Filter>資源檔\Feature</Filter>
+    </ClCompile>
+    <ClCompile Include="HOG.cpp">
+      <Filter>資源檔\Feature</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library.h">
@@ -85,6 +97,12 @@
     </ClInclude>
     <ClInclude Include="GraphTree.h">
       <Filter>標頭檔\Segment</Filter>
+    </ClInclude>
+    <ClInclude Include="LBP.h">
+      <Filter>標頭檔\Feature</Filter>
+    </ClInclude>
+    <ClInclude Include="HOG.h">
+      <Filter>標頭檔\Feature</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

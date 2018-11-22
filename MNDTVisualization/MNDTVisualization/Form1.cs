@@ -229,12 +229,12 @@ namespace MNDTVisualization
         {
             string hisPath = @"C:\Users\Ghost\Desktop\Lenn.jpg";
             Bitmap hisImage = new Bitmap(hisPath);
-            
+
             new ImageForm(hisImage, "HistogramImage").Show();
 
             hisImage = _lib.ChangeColor(hisImage, ColerType.BGR2HSV);
             hisImage = _lib.Channel(hisImage);
-            
+
             new ImageForm(hisImage, "HistogramImageHChannel").Show();
 
             Bitmap bitmap = _lib.BackProjection(_nowImage, hisImage, 180);
@@ -245,7 +245,7 @@ namespace MNDTVisualization
         {
             Bitmap bitmap = _lib.Channel(_nowImage);
             SetCombinationImage(bitmap, "Channel");
-            
+
             pic_pur.Image = _lib.Channel(_fileImage);
         }
 
@@ -253,7 +253,7 @@ namespace MNDTVisualization
         {
             Bitmap bitmap = _lib.Threshold8bit(_nowImage, 65);
             SetCombinationImage(bitmap, "Threshold");
-            
+
             bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
             pic_pur.Image = _lib.Threshold8bit(bitmap, 65);
         }
@@ -300,7 +300,7 @@ namespace MNDTVisualization
 
             bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
             pic_pur.Image = _lib.Resize8bit(bitmap, 200, 300, ResizeType.LINEAR);
-            
+
         }
 
         private void btn_pyramid_down_Click(object sender, EventArgs e)
@@ -335,17 +335,154 @@ namespace MNDTVisualization
             float sigma = 0.7f;
             float threshold = 100f;
             int minSize = 100;
-            pic_pur.Image = _lib.SelectiveSearch(_fileImage, sigma, threshold, minSize);
+            // pic_pur.Image = _lib.SelectiveSearch(_fileImage, sigma, threshold, minSize);
             //pic_pur.Image = _lib.SegmentImage(_fileImage, sigma, threshold, minSize);
+            _lib.HOGCellHistogram(_fileImage);
         }
 
         private void btn_24bit_sobel_Click(object sender, EventArgs e)
         {
             Bitmap bitmap = _lib.Sobel24bit(_nowImage, true, false);
             SetCombinationImage(bitmap, "24bitSobel");
+
             new ImageForm(_lib.Sobel24bit(_fileImage, true, false), "24bitSobel dx").Show();
             new ImageForm(_lib.Sobel24bit(_fileImage, false, true), "24bitSobel dy").Show();
+
             pic_pur.Image = _lib.Sobel24bit(_fileImage, true, false);
+        }
+
+        private void btn_sobel_edge_Click(object sender, EventArgs e)
+        {
+            Bitmap bitmap = _lib.SobelEdge8bit(_nowImage);
+            SetCombinationImage(bitmap, "SobelEdge");
+
+            bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
+            pic_pur.Image = _lib.SobelEdge8bit(bitmap);
+        }
+
+        private void btn_original_lbp_Click(object sender, EventArgs e)
+        {
+            Bitmap bitmap = _lib.OriginalLBP(_nowImage);
+            SetCombinationImage(bitmap, "OriginalLBP");
+
+            bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
+            pic_pur.Image = _lib.OriginalLBP(bitmap);
+        }
+
+        private void btn_circular_lbp_Click(object sender, EventArgs e)
+        {
+            Bitmap bitmap = _lib.CircularLBP(_nowImage);
+            SetCombinationImage(bitmap, "CircularLBP");
+
+            bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
+            pic_pur.Image = _lib.CircularLBP(bitmap);
+        }
+
+        private void btn_invariant_lbp_Click(object sender, EventArgs e)
+        {
+            Bitmap bitmap = _lib.InvariantLBP(_nowImage);
+            SetCombinationImage(bitmap, "InvariantLBP");
+
+            bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
+            pic_pur.Image = _lib.InvariantLBP(bitmap);
+        }
+
+        private void btn_equivalent_lbp_Click(object sender, EventArgs e)
+        {
+            Bitmap bitmap = _lib.EquivalentLBP(_nowImage);
+            SetCombinationImage(bitmap, "EquivalentLBP");
+
+            bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
+            pic_pur.Image = _lib.EquivalentLBP(bitmap);
+        }
+
+        private void btn_mb_lbp_Click(object sender, EventArgs e)
+        {
+            Bitmap bitmap = _lib.MultiScaleBlockLBP(_nowImage);
+            SetCombinationImage(bitmap, "MultiScaleBlockLBP");
+
+            bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
+            pic_pur.Image = _lib.MultiScaleBlockLBP(bitmap);
+        }
+
+        private void btn_semb_lbp_Click(object sender, EventArgs e)
+        {
+            Bitmap bitmap = _lib.SEMultiScaleBlockLBP(_nowImage);
+            SetCombinationImage(bitmap, "SEMultiScaleBlockLBP");
+
+            bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
+            pic_pur.Image = _lib.SEMultiScaleBlockLBP(bitmap);
+        }
+
+        private void btn_histogram_lbp_Click(object sender, EventArgs e)
+        {
+            Bitmap bitmap = _lib.LBPHistogram(_nowImage, 8, 8, 60);
+            SetCombinationImage(bitmap, "LBPHistogram");
+
+            bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
+            pic_pur.Image = _lib.LBPHistogram(bitmap, 8, 8, 256);
+        }
+
+        private void btn_gamma_Click(object sender, EventArgs e)
+        {
+            Bitmap bitmap = _lib.Gamma(_nowImage, 0.8);
+            SetCombinationImage(bitmap, "Gamma");
+
+            bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
+            pic_pur.Image = _lib.Gamma(bitmap, 0.8);
+        }
+
+        private void btn_gradient_hog_Click(object sender, EventArgs e)
+        {
+            Bitmap bitmap = _lib.HOGGradient(_nowImage);
+            SetCombinationImage(bitmap, "HOGGradient");
+
+            bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
+            pic_pur.Image = _lib.HOGGradient(bitmap);
+        }
+
+        private void btn_hog_block_view_Click(object sender, EventArgs e)
+        {
+            Bitmap bitmap = _lib.HOGBlockView(_nowImage, 16, 16, 2, 2);
+            SetCombinationImage(bitmap, "HOGBlockView");
+
+            bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
+            pic_pur.Image = _lib.HOGBlockView(bitmap, 16, 16, 2, 2);
+        }
+
+        private void btn_hog_cell_view_Click(object sender, EventArgs e)
+        {
+            Bitmap bitmap = _lib.HOGCellView(_nowImage, 16, 16);
+            SetCombinationImage(bitmap, "HOGCellView");
+
+            bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
+            pic_pur.Image = _lib.HOGCellView(bitmap, 16, 16);
+        }
+
+        private void btn_hough_lines_Click(object sender, EventArgs e)
+        {
+            //Bitmap bitmap = _lib.HoughLines(_nowImage, 1.0f, (float)(Math.PI / 180), 50);
+            //SetCombinationImage(bitmap, "HoughLines");
+
+            Bitmap bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
+            bitmap = _lib.SobelEdge8bit(bitmap);
+            bitmap = _lib.Threshold8bit(bitmap, 65);
+            bitmap = _lib.HoughLines(bitmap, 0.7f, (float)(Math.PI / 180.0), 120);
+            pic_pur.Image = bitmap;
+            new ImageForm(bitmap, "HoughLines").Show();
+        }
+
+        private void btn_hough_circle_Click(object sender, EventArgs e)
+        {
+            //Bitmap bitmap = _lib.HoughCircles(_nowImage, 30, 70, 30);
+            //SetCombinationImage(bitmap, "HoughCircles");
+
+            Bitmap bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
+            //bitmap = _lib.SobelEdge8bit(bitmap);
+            //bitmap = _lib.Threshold8bit(bitmap, 10);
+            bitmap = _lib.HoughCircles(bitmap, 30, 70, 30);
+            pic_pur.Image = bitmap;
+            new ImageForm(bitmap, "HoughCircles").Show();
         }
     }
 }

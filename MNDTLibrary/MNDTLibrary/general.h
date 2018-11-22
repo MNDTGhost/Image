@@ -4,6 +4,9 @@
 #include <fstream>
 #include <string>
 #include <algorithm>
+#include <map>
+#include <unordered_map>
+#include <vector>
 
 //#define NDEBUG
 #include <assert.h>
@@ -37,6 +40,12 @@ namespace MNDT {
 		LINEAR
 	};
 
+	enum Normalized
+	{
+		L1,
+		L2
+	};
+
 	template <typename T>
 	inline void Write(T& data)
 	{
@@ -45,6 +54,16 @@ namespace MNDT {
 		fwLog.open(MNDT::LOG_FILE, std::ios::app);
 		fwLog << data;
 		fwLog.close();
+	}
+
+	inline float FixValue(C_FLOAT& value)
+	{
+		return abs(value) < 0.00000001f ? 0 : value;
+	}
+
+	inline double FixValue(C_DOUBLE& value)
+	{
+		return abs(value) < 0.00000001 ? 0 : value;
 	}
 
 	extern char* LOG_FILE;

@@ -151,7 +151,9 @@
     <ClCompile Include="GaussianElimination.cpp" />
     <ClCompile Include="general.cpp" />
     <ClCompile Include="GraphTree.cpp" />
+    <ClCompile Include="HOG.cpp" />
     <ClCompile Include="Image.cpp" />
+    <ClCompile Include="LBP.cpp" />
     <ClCompile Include="Library.cpp" />
     <ClCompile Include="MNDTLibrary.cpp" />
     <ClCompile Include="Point.cpp" />
@@ -163,7 +165,9 @@
     <ClInclude Include="GaussianElimination.h" />
     <ClInclude Include="general.h" />
     <ClInclude Include="GraphTree.h" />
+    <ClInclude Include="HOG.h" />
     <ClInclude Include="Image.h" />
+    <ClInclude Include="LBP.h" />
     <ClInclude Include="Library.h" />
     <ClInclude Include="Point.h" />
     <ClInclude Include="Rect.h" />

@@ -900,27 +900,22 @@ void Library::SetHistogram8bit(C_UCHAE* src, int32_t* histogram
 	}
 }
 
-void Library::SetNormalizedHistogram8bit(int32_t* histogram
+void Library::SetNormalizedHistogram8bit(float* histogram
 	, C_UINT32 size
-	, C_UCHAE base)
+	, MNDT::Normalized type)
 {
-	int32_t max = 0;
-
-	for (UINT32 index = 0; index < size; index++)
+	switch (type)
 	{
-		max = max < histogram[index] ? histogram[index] : max;
-	}
-
-
-	float normalizedBase = static_cast<float>(base) / max;
-
-	for (UINT32 index = 0; index < size; index++)
-	{
-		histogram[index] = static_cast<int32_t>(histogram[index] * normalizedBase);
+	case MNDT::L1:
+		L1NormalizedHistogram8bit(histogram, size);
+		break;
+	case MNDT::L2:
+		L2NormalizedHistogram8bit(histogram, size);
+		break;
 	}
 }
 
-void Library::SetNormalizedHistogram8bit(float* histogram
+void Library::L1NormalizedHistogram8bit(float* histogram
 	, C_UINT32 size)
 {
 	float L1 = 0;
@@ -934,6 +929,24 @@ void Library::SetNormalizedHistogram8bit(float* histogram
 	for (UINT32 index = 0; index < size; index++)
 	{
 		histogram[index] /= L1;
+	}
+}
+
+void Library::L2NormalizedHistogram8bit(float* histogram
+	, C_UINT32 size)
+{
+	float L2 = 0.0f;
+
+	for (UINT32 index = 0; index < size; index++)
+	{
+		L2 += (histogram[index] * histogram[index]);
+	}
+
+	L2 = sqrt(L2 + 0.000001f);
+
+	for (UINT32 index = 0; index < size; index++)
+	{
+		histogram[index] /= L2;
 	}
 }
 
@@ -1105,8 +1118,8 @@ void Library::MeanShift(C_UCHAE* src, UCHAE* pur
 
 	for (UINT32 time = 0; time < times; time++)
 	{
-		C_UINT32 endX = rect.EndX();
-		C_UINT32 endY = rect.EndY();
+		C_UINT32 endX = rect.EndX() + 1;
+		C_UINT32 endY = rect.EndY() + 1;
 
 		int32_t centerX = (rect.Width() >> 1) + rect.X();
 		int32_t centerY = (rect.Height() >> 1) + rect.Y();
@@ -1201,7 +1214,7 @@ void Library::RotateVertical8bit(C_UCHAE* src, UCHAE* pur
 void Library::Resize8bit(C_UCHAE* src, UCHAE* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_UINT32 reWidth, C_UINT32 reHeight
-	, C_UINT32 type)
+	, MNDT::ResizeType type)
 {
 	switch (type)
 	{
@@ -1258,8 +1271,8 @@ void Library::LinearResize8bit(C_UCHAE* src, UCHAE* pur
 
 	//(0, 0), (0, 1), (1, 0), (1, 1)
 	C_FLOAT w1 = (1.0f - xOffset) * (1.0f - yOffset);
-	C_FLOAT w2 = xOffset * (1.0f - yOffset);
-	C_FLOAT w3 = (1.0f - xOffset) * yOffset;
+	C_FLOAT w2 = (1.0f - xOffset) * yOffset;
+	C_FLOAT w3 = xOffset * (1.0f - yOffset);
 	C_FLOAT w4 = xOffset * yOffset;
 
 	for (UINT32 row = 0; row < reHeight; row++)
@@ -1377,11 +1390,13 @@ void Library::SetSobelKernels(int32_t* kernels
 {
 	if (!dx && dy)
 	{
+		//int32_t arrays[9] = { -3, -10, -3, 0, 0, 0, 3, 10, 3 };
 		int32_t arrays[9] = { -1, -2, -1, 0, 0, 0, 1, 2, 1 };
 		memcpy(kernels, arrays, sizeof(int32_t) * 9);
 	}
 	else if (dx && !dy)
 	{
+		//int32_t arrays[9] = { -3, 0, 3, -10, 0, 10, -3, 0, 3 };
 		int32_t arrays[9] = { -1, 0, 1, -2, 0, 2, -1, 0, 1 };
 		memcpy(kernels, arrays, sizeof(int32_t) * 9);
 	}
@@ -1395,6 +1410,113 @@ void Library::SetSobelKernels(int32_t* kernels
 		int32_t arrays[9] = { 0, -2, -2, 2, 0, -2, 2, 2, 0 };
 		memcpy(kernels, arrays, sizeof(int32_t) * 9);
 	}
+}
+
+void Library::Sobel8bit(C_UCHAE* src, int32_t* data
+	, C_UINT32 width, C_UINT32 height
+	, const bool dx, const bool dy)
+{
+	// 1. padding
+	C_UINT32 padWidth = width + 2;
+	C_UINT32 padHeight = height + 2;
+	UCHAE* padSrc = new UCHAE[padWidth * padHeight];
+
+	ImagePadding8bit(src, padSrc, width, height, 1);
+
+
+	// 2. set kernel
+	Image srcImage(padSrc, padWidth, padHeight, MNDT::ImageType::GRAY_8BIT);
+	int32_t kernels[9];
+
+	SetSobelKernels(kernels
+		, dx, dy);
+
+
+	// 3. calculate convolution
+	for (UINT32 row = 1; row < padWidth - 1; row++)
+	{
+		for (UINT32 col = 1; col < padHeight - 1; col++)
+		{
+			int32_t sum = 0;
+			UINT32 kernelsIndex = 0;
+
+			for (int32_t blockRow = -1; blockRow <= 1; blockRow++)
+			{
+				for (int32_t blockCol = -1; blockCol <= 1; blockCol++)
+				{
+					UCHAE pix = srcImage.image[row + blockRow][col + blockCol];
+
+					sum += (static_cast<int32_t>(pix) * kernels[kernelsIndex]);
+					kernelsIndex++;
+				}
+			}
+
+			*data = sum;
+			data++;
+		}
+	}
+
+	delete[] padSrc;
+	padSrc = nullptr;
+}
+
+void Library::SobelEdgeView8bit(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height)
+{
+	// 1. get sobel
+	int32_t* Gx = new int32_t[width * height];
+	int32_t* Gy = new int32_t[width * height];
+	C_UCHAE* srcEnd = src + width * height;
+
+	Sobel8bit(src, Gx
+		, width, height
+		, true, false);
+
+	Sobel8bit(src, Gy
+		, width, height
+		, false, true);
+
+
+	// 2. calculate abs and get max
+	int32_t max = 0;
+	int32_t* data = new int32_t[width * height];
+	int32_t* dataPointer = data;
+	int32_t* GxPointer = Gx;
+	int32_t* GyPointer = Gy;
+
+	while (src < srcEnd)
+	{
+		*dataPointer = abs(*GxPointer) + abs(*GyPointer);
+		max = max < *dataPointer ? *dataPointer : max;
+
+		dataPointer++;
+		src++;
+		GxPointer++;
+		GyPointer++;
+	}
+
+	delete[] Gx;
+	Gx = nullptr;
+
+	delete[] Gy;
+	Gy = nullptr;
+
+
+
+	// 3. normalization
+	C_UCHAE* purEnd = pur + width * height;
+	dataPointer = data;
+
+	while (pur < purEnd)
+	{
+		*pur = *dataPointer * 255 / max;
+
+		dataPointer++;
+		pur++;
+	}
+
+	delete[] data;
+	data = nullptr;
 }
 
 void Library::Sobel24bit(C_UCHAE* src, int32_t* data
@@ -1419,7 +1541,6 @@ void Library::Sobel24bit(C_UCHAE* src, int32_t* data
 	{
 		for (UINT32 col = 1; col < padHeight - 1; col++)
 		{
-			Pixel srcPix = srcImage.GetPixel(row, col);
 			int32_t bSum = 0;
 			int32_t gSum = 0;
 			int32_t rSum = 0;
@@ -1514,12 +1635,13 @@ void Library::SobelVisualization24bit(C_UCHAE* src, UCHAE* pur
 	data = nullptr;
 }
 
-void Library::CartToPolar24bit(C_INT32* Gx, C_INT32* Gy
+void Library::CartToPolar(C_INT32* Gx, C_INT32* Gy
 	, C_UINT32 width, C_UINT32 height
-	, float* magnitude, float* angles)
+	, float* magnitude, float* angles
+	, MNDT::ImageType type)
 {
 	const double angle = 180.0 / MNDT::PI;
-	C_UINT32 size = width * height * 3;
+	C_UINT32 size = width * height * type;
 	C_INT32* GxEnd = Gx + size;
 
 	while (Gx < GxEnd)
@@ -1531,6 +1653,567 @@ void Library::CartToPolar24bit(C_INT32* Gx, C_INT32* Gy
 		Gy++;
 		angles++;
 		magnitude++;
+	}
+}
+
+void Library::Gamma8bit(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height
+	, C_DOUBLE gamma)
+{
+	UCHAE gammaLUT[256];
+
+	for (UINT32 index = 0; index < 256; index++)
+	{
+		double pix = (index + 0.5) / 256.0; //歸一化
+		pix = pow(pix, gamma);
+		gammaLUT[index] = static_cast<UCHAE>((pix * 256 - 0.5)); //反歸一化
+	}
+
+	UCHAE* purEnd = pur + width * height;
+
+	while (pur < purEnd)
+	{
+		*pur = gammaLUT[*src];
+		pur++;
+		src++;
+	}
+}
+
+//void Library::HoughLines(C_UCHAE* src, UCHAE* pur
+//	, C_UINT32 width, C_UINT32 height
+//	, C_FLOAT rho, C_FLOAT theta, C_FLOAT threshold)
+//{
+//	C_FLOAT fixRho = 1.0f / rho;
+//	C_UINT32 thetaSize = static_cast<UINT32>(MNDT::PI / theta);
+//	float* fixSin = new float[thetaSize];
+//	float* fixCos = new float[thetaSize];
+//
+//	for (UINT32 index = 0; index < thetaSize; index++)
+//	{
+//		fixSin[index] = MNDT::FixValue(sin(theta * index)) * fixRho;
+//		fixCos[index] = MNDT::FixValue(cos(theta * index)) * fixRho;
+//	}
+//
+//	Image srcImage(const_cast<UCHAE*>(src), width, height, MNDT::ImageType::GRAY_8BIT);
+//	C_DOUBLE originalR = std::max((width + height) * sin(MNDT::PI / 4.0), static_cast<double>(std::max(width, height)));
+//	//C_DOUBLE originalR = 14 * sin(MNDT::PI / 4.0);
+//	C_UINT32 maxR = static_cast<UINT32>(originalR * fixRho) + 1 + 2;
+//	C_UINT32 xAxisOffset = maxR * (thetaSize + 2);
+//	UINT32* count = new UINT32[xAxisOffset * 2]{ 0 };
+//
+//	for (UINT32 row = 0; row < height; row++)
+//	{
+//		for (UINT32 col = 0; col < width; col++)
+//		{
+//			if (srcImage.image[row][col] > 0)
+//			{
+//				for (UINT32 index = 0; index < thetaSize; index++)
+//				{
+//					int32_t r = static_cast<int32_t>(fixSin[index] * row + fixCos[index] * col);
+//
+//					r = r < 0 ? abs(r) + xAxisOffset : r;
+//					count[maxR * (index + 1) + r + 1]++;
+//				}
+//			}
+//		}
+//	}
+//
+//
+//	//for (UINT32 index = 0; index < thetaSize; index++)
+//	//{
+//	//	int32_t r = static_cast<int32_t>(fixSin[index] * 7 + fixCos[index] * 7);
+//	//	UINT32 offset = r < 0 ? xAxisOffset : 0;
+//	//	count[offset + abs(r) + maxR * index]++;
+//
+//	//	r = static_cast<int32_t>(fixSin[index] * 3 + fixCos[index] * 3);
+//	//	offset = r < 0 ? xAxisOffset : 0;
+//	//	count[offset + abs(r) + maxR * index]++;
+//
+//	//	r = static_cast<int32_t>(fixSin[index] * 5 + fixCos[index] * 5);
+//	//	offset = r < 0 ? xAxisOffset : 0;
+//	//	count[offset + abs(r) + maxR * index]++;
+//
+//	//	r = static_cast<int32_t>(fixSin[index] * 1 + fixCos[index] * 1);
+//	//	offset = r < 0 ? xAxisOffset : 0;
+//	//	count[offset + abs(r) + maxR * index]++;
+//
+//	//}
+//
+//	//SetNormalizedHistogram8bit(count, maxR * thetaSize * 2, 255);
+//
+//	//HoughDrawPolar(pur
+//	//	, width, height
+//	//	, count
+//	//	, theta, maxR);
+//
+//	UINT32* findCount = new UINT32[xAxisOffset * 2]{ 0 };
+//	UINT32 findIndex = 0;
+//
+//	for (UINT32 index = 0; index < thetaSize; index++)
+//	{
+//		C_UINT32 offset = maxR * (index + 1);
+//		UINT32* nowCountPointer = nullptr;
+//
+//		for (UINT32 countIndex = offset + 1; countIndex < offset + maxR - 1; countIndex++)
+//		{
+//			// +
+//			nowCountPointer = count + countIndex;
+//			if (*nowCountPointer > threshold
+//				|| *nowCountPointer > *(nowCountPointer - 1)
+//				|| *nowCountPointer > *(nowCountPointer + 1)
+//				|| *nowCountPointer > *(nowCountPointer - maxR)
+//				|| *nowCountPointer > *(nowCountPointer + maxR))
+//			{
+//				findCount[findIndex++] = countIndex;
+//			}
+//
+//			// -
+//			nowCountPointer = count + countIndex + xAxisOffset;
+//
+//			if (*nowCountPointer > threshold
+//				|| *nowCountPointer > *(nowCountPointer - 1)
+//				|| *nowCountPointer > *(nowCountPointer + 1)
+//				|| *nowCountPointer > *(nowCountPointer - maxR)
+//				|| *nowCountPointer > *(nowCountPointer + maxR))
+//			{
+//				findCount[findIndex++] = countIndex + xAxisOffset;
+//			}
+//		}
+//	}
+//
+//	std::sort(findCount, findCount + findIndex
+//		, [&count](const UINT32& index1, const UINT32& index2) { return *(count + index1) > *(count + index2); });
+//
+//	Image purImage(pur, width, height, MNDT::ImageType::GRAY_8BIT);
+//
+//	for (UINT32 index = 0; index < findIndex; index++)
+//	{
+//		UINT32 countIndex = findCount[index] - 1;
+//		
+//		if (countIndex < xAxisOffset)
+//		{
+//			UINT32 thetaIndex = countIndex / maxR - 1;
+//			int32_t r = countIndex % maxR;
+//			float dangle = theta * thetaIndex;
+//			float drho =  r;
+//
+//			double a = cos(dangle), b = sin(dangle);
+//			double x0 = a*drho , y0 = b*drho ;
+//			int32_t x1 = x0 - 1*b;
+//			int32_t y1 = y0 + 1* a ;
+//			int32_t x2 = x0 + 1* b;
+//			int32_t y2 = y0 - 1* a ;
+//
+//			if (x1 < 0 || y1 < 0 || x2 < 0 || y2 < 0
+//				|| x1 >= width || y1 >= height || x2 >= width || y2 >= height)
+//			{
+//				continue;
+//			}
+//			MNDT::DrawLine8bit(purImage, Point(x1, y1), Point(x2, y2));
+//		}
+//		else
+//		{
+//			countIndex -= xAxisOffset;
+//			UINT32 thetaIndex = countIndex / maxR - 1;
+//			int32_t r = countIndex % maxR;
+//			float dangle = theta * thetaIndex;
+//			float drho = -r;
+//
+//			double a = cos(dangle), b = sin(dangle);
+//			double x0 = a*drho, y0 = b*drho;
+//			int32_t x1 = x0 - b;
+//			int32_t y1 = y0 + a;
+//			int32_t x2 = x0 + b;
+//			int32_t y2 = y0 - a;
+//
+//			if (x1 < 0 || y1 < 0 || x2 < 0 || y2 < 0
+//				|| x1 >= width || y1 >= height || x2 >= width || y2 >= height)
+//			{
+//				continue;
+//			}
+//			MNDT::DrawLine8bit(purImage, Point(x1, y1), Point(x2, y2));
+//		}
+//
+//		//int32_t r = static_cast<int32_t>(rho(fixSin[index] * row + fixCos[index] * col));
+//
+//		//r = r < 0 ? abs(r) + xAxisOffset : r;
+//		//count[maxR * (index + 1) + r + 1]++;
+//	}
+//
+//	//for (UINT32 row = 0; row < height; row++)
+//	//{
+//	//	for (UINT32 col = 0; col < width; col++)
+//	//	{
+//	//		if (srcImage.image[row][col] > 0)
+//	//		{
+//	//			for (UINT32 index = 0; index < thetaSize; index++)
+//	//			{
+//	//				int32_t r = static_cast<int32_t>(fixSin[index] * row + fixCos[index] * col);
+//
+//	//				r = r < 0 ? abs(r) + xAxisOffset : r;
+//	//				if (count[maxR * (index + 1) + r + 1] > 0)
+//	//				{
+//	//					purImage.image[row][col] = 150;
+//	//					break;
+//	//				}
+//	//			}
+//	//		}
+//	//	}
+//	//}
+//
+//	delete[] findCount;
+//	findCount = nullptr;
+//
+//	delete[] fixSin;
+//	fixSin = nullptr;
+//
+//	delete[] fixCos;
+//	fixCos = nullptr;
+//
+//	delete[] count;
+//	count = nullptr;
+//}
+
+void Library::HoughLines(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height
+	, C_FLOAT rho, C_FLOAT theta, C_UINT32 threshold)
+{
+	// 1. init params
+	C_FLOAT fixRho = 1.0f / rho;
+	C_UINT32 thetaSize = static_cast<UINT32>(MNDT::PI / theta);
+	float* fixSin = new float[thetaSize];
+	float* fixCos = new float[thetaSize];
+
+	for (UINT32 index = 0; index < thetaSize; index++)
+	{
+		fixSin[index] = MNDT::FixValue(sin(theta * index)) * fixRho;
+		fixCos[index] = MNDT::FixValue(cos(theta * index)) * fixRho;
+	}
+
+	// 2. hough total
+	Image srcImage(const_cast<UCHAE*>(src), width, height, MNDT::ImageType::GRAY_8BIT);
+	C_DOUBLE originalR = std::max((width + height) * sin(MNDT::PI / 4.0), static_cast<double>(std::max(width, height)));
+	C_UINT32 maxR = static_cast<UINT32>(originalR * fixRho) + 1 + 2;
+	C_UINT32 xAxisOffset = maxR * (thetaSize + 2);
+	UINT32* count = new UINT32[xAxisOffset * 2]{ 0 };
+
+	for (UINT32 row = 0; row < height; row++)
+	{
+		for (UINT32 col = 0; col < width; col++)
+		{
+			if (srcImage.image[row][col] > 0)
+			{
+				for (UINT32 index = 0; index < thetaSize; index++)
+				{
+					int32_t r = static_cast<int32_t>(fixSin[index] * row + fixCos[index] * col);
+
+					r = r < 0 ? abs(r) + xAxisOffset : r;
+					count[maxR * (index + 1) + r + 1]++;
+				}
+			}
+		}
+	}
+
+	//// draw hough
+	//DrawHoughPolar(pur
+	//	, width, height
+	//	, count
+	//	, theta, maxR);
+
+	// 3. update neighbours
+	HoughLineNeighboursUpdate(count
+		, thetaSize, maxR
+		, threshold);
+
+
+	// 4. draw line
+	Image purImage(pur, width, height, MNDT::ImageType::GRAY_8BIT);
+
+	for (UINT32 row = 0; row < height; row++)
+	{
+		for (UINT32 col = 0; col < width; col++)
+		{
+			if (srcImage.image[row][col] > 0)
+			{
+				for (UINT32 index = 0; index < thetaSize; index++)
+				{
+					int32_t r = static_cast<int32_t>(fixSin[index] * row + fixCos[index] * col);
+
+					r = r < 0 ? abs(r) + xAxisOffset : r;
+					if (count[maxR * (index + 1) + r + 1] > 0)
+					{
+						purImage.image[row][col] = 255;
+					}
+				}
+			}
+		}
+	}
+
+	delete[] fixSin;
+	fixSin = nullptr;
+
+	delete[] fixCos;
+	fixCos = nullptr;
+
+	delete[] count;
+	count = nullptr;
+}
+
+void Library::DrawHoughPolar(UCHAE* pur
+	, C_UINT32 width, C_UINT32 height
+	, C_UINT32* count
+	, C_FLOAT theta, C_UINT32 maxR)
+{
+	C_UINT32 thetaSize = static_cast<UINT32>(MNDT::PI / theta);
+	C_UINT32 xAxisOffset = maxR * (thetaSize + 2);
+	C_UINT32 halfHeight = height >> 1;
+	Image purImage(pur, width, height, MNDT::ImageType::GRAY_8BIT);
+
+	for (UINT32 index = 0; index < thetaSize; index++)
+	{
+		C_UINT32 x = static_cast<UINT32>(theta * index / MNDT::PI * width);
+		C_UINT32 offset = maxR * (index + 1);
+
+		for (UINT32 countIndex = offset + 1; countIndex < offset + maxR; countIndex++)
+		{
+			// x axis -> + and -
+			for (UINT32 axis = 0; axis < 2; axis++)
+			{
+				C_UINT32* nowCountPointer = count + countIndex + xAxisOffset * axis;
+
+				if (*nowCountPointer > 0)
+				{
+					C_UINT32 y = static_cast<UINT32>(halfHeight + (countIndex - offset) / static_cast<float>(maxR) * halfHeight);
+					Point point(x, y);
+
+					MNDT::DrawPoint8bit(purImage, point);
+				}
+			}
+		}
+	}
+}
+
+void Library::HoughLineNeighboursUpdate(UINT32* count
+	, C_UINT32 thetaSize, C_UINT32 maxR
+	, C_UINT32 threshold)
+{
+	C_UINT32 xAxisOffset = maxR * (thetaSize + 2);
+
+	for (UINT32 index = 0; index < thetaSize; index++)
+	{
+		C_UINT32 offset = maxR * (index + 1);
+
+		for (UINT32 countIndex = offset + 1; countIndex < offset + maxR - 1; countIndex++)
+		{
+			// x axis -> + and -
+			for (UINT32 axis = 0; axis < 2; axis++)
+			{
+				UINT32* nowCountPointer = count + countIndex + xAxisOffset * axis;
+
+				if (*nowCountPointer < threshold
+					|| *nowCountPointer < *(nowCountPointer - 1)
+					|| *nowCountPointer < *(nowCountPointer + 1)
+					|| *nowCountPointer < *(nowCountPointer - maxR)
+					|| *nowCountPointer < *(nowCountPointer + maxR))
+				{
+					*nowCountPointer = 0;
+				}
+			}
+
+		}
+	}
+}
+
+
+void Library::HoughCircles(C_UCHAE* src, UCHAE* pur
+	, C_UINT32 width, C_UINT32 height
+	, C_FLOAT minRadius, C_FLOAT maxRadius, C_UINT32 threshold)
+{
+	// 1. total
+	UINT32* count = new UINT32[(width + 2) * (height + 2)]{ 0 };
+
+	HoughCirclesCount(src
+		, width, height
+		, count
+		, minRadius, maxRadius);
+
+
+	// 2. update neighbours
+	HoughCircleNeighboursUpdate(count
+		, width, height
+		, threshold);
+
+	// 3. draw
+	Image srcImage(const_cast<UCHAE*>(src), width, height, MNDT::ImageType::GRAY_8BIT);
+	Image purImage(pur, width, height, MNDT::ImageType::GRAY_8BIT);
+
+	for (UINT32 row = 0; row < height; row++)
+	{
+		C_UINT32 rowIndex = (row + 1) * width;
+
+		for (UINT32 col = 0; col < width; col++)
+		{
+			C_UINT32 nowIndex = rowIndex + col + 1;
+
+			if (count[nowIndex] == 0)
+			{
+				continue;
+			}
+
+			for (float radius = minRadius; radius <= maxRadius; radius++)
+			{
+				bool nCircle = false;
+
+				for (float pi = 0; pi <= MNDT::PI * 2; pi += 0.2f)
+				{
+					int32_t y = static_cast<int32_t>(static_cast<float>(row) + MNDT::FixValue(sin(pi)) * radius);
+					int32_t x = static_cast<int32_t>(static_cast<float>(col) + MNDT::FixValue(cos(pi)) * radius);
+
+					if (x < 0 || y < 0
+						|| (unsigned)x >= width || (unsigned)y >= height
+						|| srcImage.image[y][x] == 0)
+					{
+						nCircle = true;
+						break;
+					}
+				}
+
+				if (nCircle)
+				{
+					continue;
+				}
+
+				for (float pi = 0; pi <= MNDT::PI * 2; pi += 0.2f)
+				{
+					C_UINT32 y = static_cast<UINT32>(row + MNDT::FixValue(sin(pi)) * radius);
+					C_UINT32 x = static_cast<UINT32>(col + MNDT::FixValue(cos(pi)) * radius);
+
+					purImage.image[y][x] = 255;
+				}
+			}
+		}
+	}
+
+	delete[] count;
+	count = nullptr;
+}
+
+void Library::HoughCirclesCount(C_UCHAE* src
+	, C_UINT32 width, C_UINT32 height
+	, UINT32* count
+	, C_FLOAT minRadius, C_FLOAT maxRadius)
+{
+	assert(count != nullptr);
+
+	// get gradient
+	Library lib;
+	int32_t* Gx = new int32_t[width * height];
+	int32_t* Gy = new int32_t[width * height];
+
+	lib.Sobel8bit(src, Gx
+		, width, height
+		, true, false);
+
+	lib.Sobel8bit(src, Gy
+		, width, height
+		, false, true);
+
+	// calculate gradient total
+	Image srcImage(const_cast<UCHAE*>(src), width, height, MNDT::ImageType::GRAY_8BIT);
+
+	for (UINT32 row = 0; row < height; row++)
+	{
+		C_UINT32 rowIndex = row * width;
+
+		for (UINT32 col = 0; col < width; col++)
+		{
+			C_UINT32 index = rowIndex + col;
+
+			if (srcImage.image[row][col] > 0)
+			{
+				C_FLOAT magnitude = static_cast<float>(sqrt(Gx[index] * Gx[index] + Gy[index] * Gy[index] + 0.0001f));
+				float offsetX = Gx[index] / magnitude;
+				float offsetY = Gy[index] / magnitude;
+
+				for (UINT32 sign = 0; sign < 2; sign++)
+				{
+					float x = col + minRadius * offsetX;
+					float y = row + minRadius * offsetY;
+
+					for (float radius = minRadius; radius <= maxRadius; radius++)
+					{
+						if (x < 0 || y < 0
+							|| x >= width || y >= height)
+						{
+							continue;
+						}
+						//MNDT::DrawLine8bit(purImage, Point(col, row), Point(static_cast<UINT32>(x), static_cast<UINT32>(y)));
+						HoughCirclePointCount(count, width, Point(col, row), Point(static_cast<UINT32>(x), static_cast<UINT32>(y)));
+						x += offsetX;
+						y += offsetY;
+					}
+
+					offsetX = -offsetX;
+					offsetY = -offsetY;
+				}
+			}
+		}
+	}
+
+	delete[] Gx;
+	Gx = nullptr;
+
+	delete[] Gy;
+	Gy = nullptr;
+}
+
+void Library::HoughCirclePointCount(UINT32* count
+	, C_UINT32 width
+	, const Point& p1, const Point& p2)
+{
+	C_UINT32 absDiffX = abs(static_cast<int32_t>(p1.X()) - static_cast<int32_t>(p2.X()));
+	C_UINT32 absDiffY = abs(static_cast<int32_t>(p1.Y()) - static_cast<int32_t>(p2.Y()));
+	C_UINT32 base = absDiffX > absDiffY ? absDiffY : absDiffX;
+	C_INT32 diffX = static_cast<int32_t>(p1.X()) - static_cast<int32_t>(p2.X());
+	C_INT32 diffY = static_cast<int32_t>(p1.Y()) - static_cast<int32_t>(p2.Y());
+	C_INT32 baseX = diffX < 0 ? 1 : -1;
+	C_INT32 baseY = diffY < 0 ? 1 : -1;
+
+	int32_t x = p1.X();
+	int32_t y = p1.Y();
+
+	for (UINT32 index = 0; index < base; index++)
+	{
+		count[static_cast<UINT32>(static_cast<UINT32>(y + 1) * width + x + 1)]++;
+		x += baseX;
+		y += baseY;
+	}
+}
+
+
+void Library::HoughCircleNeighboursUpdate(UINT32* count
+	, C_UINT32 width, C_UINT32 height
+	, C_UINT32 threshold)
+{
+	// 4鄰比較
+	for (UINT32 row = 0; row < height; row++)
+	{
+		C_UINT32 rowIndex = (row + 1) * width;
+
+		for (UINT32 col = 0; col < width; col++)
+		{
+			C_UINT32 nowIndex = rowIndex + col + 1;
+			UINT32* nowCountPointer = count + nowIndex;
+
+			if (*nowCountPointer < threshold
+				|| *nowCountPointer < *(nowCountPointer - 1)
+				|| *nowCountPointer < *(nowCountPointer + 1)
+				|| *nowCountPointer < *(nowCountPointer - width - 2)
+				|| *nowCountPointer < *(nowCountPointer + width + 2))
+			{
+				*nowCountPointer = 0;
+			}
+		}
 	}
 }
 

@@ -26,8 +26,8 @@ public:
 		ChangeColor Parameter:
 		src			= source of image
 		pur			= purpose of image
-		width		= Image's width
-		height		= Image's height
+		width		= Image width
+		height		= Image height
 		type		= change type
 	*/
 	void ChangeColor(C_UCHAE* src, UCHAE* pur
@@ -38,11 +38,11 @@ public:
 		AdjustmentHSV Parameter:
 		src		= source of image
 		pur		= purpose of image
-		width		= Image's width
-		height		= Image's height
-		H		= H's %
-		S		= S's %
-		V		= V's %
+		width		= Image width
+		height		= Image height
+		H		= H %
+		S		= S %
+		V		= V %
 	*/
 	void AdjustmentHSV(C_UCHAE* src, UCHAE* pur
 		, C_UINT32 width, C_UINT32 height
@@ -52,11 +52,11 @@ public:
 		AdjustmentYCbCr Parameter:
 		src		= source of image
 		pur		= purpose of image
-		width		= Image's width
-		height		= Image's height
-		Y		= Y's %
-		Cb		= Cb's %
-		Cr		= Cr's %
+		width		= Image width
+		height		= Image height
+		Y		= Y %
+		Cb		= Cb %
+		Cr		= Cr %
 	*/
 	void AdjustmentYCbCr(C_UCHAE* src, UCHAE* pur
 		, C_UINT32 width, C_UINT32 height
@@ -66,8 +66,8 @@ public:
 		ImagePadding8bit Parameter:
 		src		= source of image
 		pur		= purpose of image
-		width		= Image's width
-		height		= Image's height
+		width		= Image width
+		height		= Image height
 		pad		= padding size
 	*/
 	void ImagePadding8bit(C_UCHAE* src, UCHAE* pur
@@ -78,8 +78,8 @@ public:
 		ImagePadding24bit Parameter:
 		src		= source of image
 		pur		= purpose of image
-		width		= Image's width
-		height		= Image's height
+		width		= Image width
+		height		= Image height
 		pad		= padding size
 	*/
 	void ImagePadding24bit(C_UCHAE* src, UCHAE* pur
@@ -90,8 +90,8 @@ public:
 		Blur8bit Parameter:
 		src			= source of image
 		pur			= purpose of image
-		width		= Image's width
-		height		= Image's height
+		width		= Image width
+		height		= Image height
 		size		= blur block
 	*/
 	void Blur8bit(C_UCHAE* src, UCHAE* pur
@@ -102,8 +102,8 @@ public:
 		BlurGauss8bit Parameter:
 		src			= source of image
 		pur			= purpose of image
-		width		= Image's width
-		height		= Image's height
+		width		= Image width
+		height		= Image height
 		size		= gauss temp size
 		sigma		= gauss temp sigma
 	*/
@@ -115,8 +115,8 @@ public:
 		BlurGauss24bit Parameter:
 		src			= source of image
 		pur			= purpose of image
-		width		= Image's width
-		height		= Image's height
+		width		= Image width
+		height		= Image height
 		size		= gauss temp size
 		sigma		= gauss temp sigma
 	*/
@@ -128,8 +128,8 @@ public:
 		MedianBlur8bit Parameter:
 		src			= source of image
 		pur			= purpose of image
-		width		= Image's width
-		height		= Image's height
+		width		= Image width
+		height		= Image height
 		size		= blur block
 	*/
 	void MedianBlur8bit(C_UCHAE* src, UCHAE* pur
@@ -140,8 +140,8 @@ public:
 		MedianBlur8bit Parameter:
 		src			= source of image
 		pur			= purpose of image
-		width		= Image's width
-		height		= Image's height
+		width		= Image width
+		height		= Image height
 		spaceSigma	= space sigma
 		colorSigma	= space sigma
 		size		= blur block
@@ -156,8 +156,8 @@ public:
 		Histogram8bit Parameter:
 		src			= source of image
 		pur			= purpose of image
-		width		= Image's width
-		height		= Image's height
+		width		= Image width
+		height		= Image height
 	*/
 	void Histogram8bit(C_UCHAE* src, UCHAE* pur
 		, C_UINT32 width, C_UINT32 height);
@@ -166,19 +166,19 @@ public:
 		SetHistogram8bit Parameter:
 		src			= source of image
 		pur			= purpose of image
-		width		= Image's width
-		height		= Image's height
+		width		= Image width
+		height		= Image height
 		minRange	= min pixel
 		maxRange	= max pixel
 		bin			= histogran split size
 	*/
 	void SetHistogram8bit(C_UCHAE* src, int32_t* histogram
-		, C_UINT32 width, C_UINT32 height);
-
-	void SetHistogram8bit(C_UCHAE* src, int32_t* histogram
 		, C_UINT32 width, C_UINT32 height
 		, C_UCHAE minRange, C_UCHAE maxRange
 		, C_UCHAE bin);
+
+	void SetHistogram8bit(C_UCHAE* src, int32_t* histogram
+		, C_UINT32 width, C_UINT32 height);
 
 	template <class T>
 	void SetHistogram24bit(C_UCHAE* src, T* histogram
@@ -192,12 +192,14 @@ public:
 		size		= histogram size
 		base		= max pixel
 	*/
-	void SetNormalizedHistogram8bit(int32_t* histogram
+	template <class T>
+	void SetNormalizedHistogram8bit(T* histogram
 		, C_UINT32 size
-		, C_UCHAE base);
+		, C_FLOAT base);
 
 	void SetNormalizedHistogram8bit(float* histogram
-		, C_UINT32 size);
+		, C_UINT32 size
+		, MNDT::Normalized type);
 
 	void SetNormalizedHistogram24bit(float* histogram
 		, C_UINT32 size);
@@ -206,8 +208,8 @@ public:
 		HistogramEqualization8bit Parameter:
 		src			= source of image
 		pur			= purpose of image
-		width		= Image's width
-		height		= Image's height
+		width		= Image width
+		height		= Image height
 	*/
 	void HistogramEqualization8bit(C_UCHAE* src, UCHAE* pur
 		, C_UINT32 width, C_UINT32 height);
@@ -216,8 +218,8 @@ public:
 		CompareHistogram Parameter:
 		src			= source of image
 		pur			= purpose of image
-		width		= Image's width
-		height		= Image's height
+		width		= Image width
+		height		= Image height
 	*/
 	double CompareHistogram(C_UCHAE* src, C_UCHAE* pur
 		, C_UINT32 width, C_UINT32 height);
@@ -226,8 +228,8 @@ public:
 		Channel Parameter:
 		src			= source of image
 		pur			= purpose of image
-		width		= Image's width
-		height		= Image's height
+		width		= Image width
+		height		= Image height
 		channel		= color channel
 	*/
 	void Channel(C_UCHAE* src, UCHAE* pur
@@ -238,8 +240,8 @@ public:
 		BackProjection Parameter:
 		src			= source of image
 		pur			= purpose of image
-		width		= Image's width
-		height		= Image's height
+		width		= Image width
+		height		= Image height
 		histogram	= histogram data
 		minRange	= min pixel
 		maxRange	= max pixel
@@ -255,8 +257,8 @@ public:
 		MeanShift Parameter:
 		src			= source of image
 		pur			= purpose of image
-		width		= Image's width
-		height		= Image's height
+		width		= Image width
+		height		= Image height
 		rectPoint	= original rect point
 		time		= trans time
 		threshold	= diff threshold
@@ -271,8 +273,8 @@ public:
 		Rotate8bit Parameter:
 		src			= source of image
 		pur			= purpose of image
-		width		= Image's width
-		height		= Image's height
+		width		= Image width
+		height		= Image height
 		type		= threshold
 	*/
 	void Rotate8bit(C_UCHAE* src, UCHAE* pur
@@ -283,8 +285,8 @@ public:
 		Resize Parameter:
 		src			= source of image
 		pur			= purpose of image
-		width		= Image's width
-		height		= Image's height
+		width		= Image width
+		height		= Image height
 		reWidth		= new width
 		reHeight	= new height
 		type		= resize type
@@ -292,14 +294,14 @@ public:
 	void Resize8bit(C_UCHAE* src, UCHAE* pur
 		, C_UINT32 width, C_UINT32 height
 		, C_UINT32 reWidth, C_UINT32 reHeight
-		, C_UINT32 type);
+		, MNDT::ResizeType type);
 
 	/*
 		PyramidDown8bit Parameter:
 		src			= source of image
 		pur			= purpose of image
-		width		= Image's width
-		height		= Image's height
+		width		= Image width
+		height		= Image height
 	*/
 	void PyramidDown8bit(C_UCHAE* src, UCHAE* pur
 		, C_UINT32 width, C_UINT32 height);
@@ -308,8 +310,8 @@ public:
 		PyramidUp8bit Parameter:
 		src			= source of image
 		pur			= purpose of image
-		width		= Image's width
-		height		= Image's height
+		width		= Image width
+		height		= Image height
 	*/
 	void PyramidUp8bit(C_UCHAE* src, UCHAE* pur
 		, C_UINT32 width, C_UINT32 height);
@@ -330,8 +332,8 @@ public:
 		Affine8bit Parameter:
 		src			= source of image
 		pur			= purpose of image
-		width		= Image's width
-		height		= Image's height
+		width		= Image width
+		height		= Image height
 		baseX		= ouput x base(a.b.c)
 		baseY		= ouput y base(a.b.c)
 	*/
@@ -339,31 +341,132 @@ public:
 		, C_UINT32 width, C_UINT32 height
 		, C_FLOAT* baseX, C_FLOAT* baseY);
 
+	/*
+		Sobel8bit Parameter:
+		src			= source of image
+		pur			= purpose of image
+		width		= Image width
+		height		= Image height
+		dx			= x gradient switch
+		dy			= y gradient switch
+	*/
+	void Sobel8bit(C_UCHAE* src, int32_t* pur
+		, C_UINT32 width, C_UINT32 height
+		, const bool dx, const bool dy);
+
+	/*
+		SobelEdgeView8bit Parameter:
+		src			= source of image
+		pur			= purpose of image
+		width		= Image width
+		height		= Image height
+	*/
+	void SobelEdgeView8bit(C_UCHAE* src, UCHAE* pur
+		, C_UINT32 width, C_UINT32 height);
+
+	/*
+		Sobel24bit Parameter:
+		src			= source of image
+		pur			= purpose of image
+		width		= Image width
+		height		= Image height
+		dx			= x gradient switch
+		dy			= y gradient switch
+	*/
 	void Sobel24bit(C_UCHAE* src, int32_t* pur
 		, C_UINT32 width, C_UINT32 height
 		, const bool dx, const bool dy);
 
+	/*
+		SobelVisualization24bit Parameter:
+		src			= source of image
+		pur			= purpose of image
+		width		= Image width
+		height		= Image height
+		dx			= x gradient switch
+		dy			= y gradient switch
+	*/
 	void SobelVisualization24bit(C_UCHAE* src, UCHAE* pur
 		, C_UINT32 width, C_UINT32 height
 		, const bool dx, const bool dy);
 
-	void CartToPolar24bit(C_INT32* Gx, C_INT32* Gy
+	/*
+		CartToPolar Parameter:
+		src			= source of image
+		pur			= purpose of image
+		width		= Image width
+		height		= Image height
+		magnitude	= Image magnitude
+		angle		= Image angle
+		type		= image type(8bit, 24bit....)
+	*/
+	void CartToPolar(C_INT32* Gx, C_INT32* Gy
 		, C_UINT32 width, C_UINT32 height
-		, float* magnitude, float* angle);
+		, float* magnitude, float* angle
+		, MNDT::ImageType type);
 
+	/*
+		Gamma8bit Parameter:
+		src			= source of image
+		pur			= purpose of image
+		width		= Image width
+		height		= Image height
+		gamma		= calculation parmas
+	*/
+	void Gamma8bit(C_UCHAE* src, UCHAE* pur
+		, C_UINT32 width, C_UINT32 height
+		, C_DOUBLE gamma);
+	
+	/*
+		HoughLines Parameter:
+		src			= source of image
+		pur			= purpose of image
+		width		= Image width
+		height		= Image height
+		rho			= calculation sin and cos
+		theta		= calculation split parmas
+		threshold	= calculation output parmas
+	*/
+	void HoughLines(C_UCHAE* src, UCHAE* pur
+		, C_UINT32 width, C_UINT32 height
+		, C_FLOAT rho, C_FLOAT theta, C_UINT32 threshold);
+
+	/*
+		HoughCircles Parameter:
+		src			= source of image
+		pur			= purpose of image
+		width		= Image width
+		height		= Image height
+		minRadius	= min radius
+		maxRadius	= max radius
+		threshold	= calculation output parmas
+	*/
+	void HoughCircles(C_UCHAE* src, UCHAE* pur
+		, C_UINT32 width, C_UINT32 height
+		, C_FLOAT minRadius, C_FLOAT maxRadius, C_UINT32 threshold);
 
 	/*
 		Threshold8bit Parameter:
 		src			= source of image
 		pur			= purpose of image
-		width		= Image's width
-		height		= Image's height
+		width		= Image width
+		height		= Image height
 		thresh		= threshold
 	*/
 	void Threshold8bit(C_UCHAE* src, UCHAE* pur
 		, C_UINT32 width, C_UINT32 height
 		, C_UINT32 thresh);
 private:
+	// tool start
+	void Gaussian2DTemp(float** const temp, C_INT32 size, C_FLOAT sigma);
+
+	void SetSobelKernels(int32_t* kernels
+		, const bool dx, const bool dy);
+	// tool end
+
+
+
+	// change color start
 	void BGR2Gray8Bit(C_UCHAE* src, UCHAE* pur
 		, C_UINT32 width, C_UINT32 height);
 
@@ -390,9 +493,11 @@ private:
 
 	void SetYCbCr2BGR(int32_t* const bgr
 		, C_INT32& Y, C_INT32& Cb, C_INT32& Cr);
+	// change color end
 
-	void Gaussian2DTemp(float** const temp, C_INT32 size, C_FLOAT sigma);
 
+
+	// change size and postion start
 	void BilateralSpaceTemp(float** const temp, C_INT32 size, C_FLOAT sigma);
 
 	void BilateralColorTemp(float* const temp, C_FLOAT sigma);
@@ -410,9 +515,43 @@ private:
 	void LinearResize8bit(C_UCHAE* src, UCHAE* pur
 		, C_UINT32 width, C_UINT32 height
 		, C_UINT32 reWidth, C_UINT32 reHeight);
+	// change size and postion end
 
-	void SetSobelKernels(int32_t* kernels
-		, const bool dx, const bool dy);
+
+
+	// normalized start
+	void L1NormalizedHistogram8bit(float* histogram
+		, C_UINT32 size);
+
+	void L2NormalizedHistogram8bit(float* histogram
+		, C_UINT32 size);
+	// normalized end
+
+
+
+	// Hough start
+	void DrawHoughPolar(UCHAE* pur
+		, C_UINT32 width, C_UINT32 height
+		, C_UINT32* count
+		, C_FLOAT theta, C_UINT32 maxR);
+
+	void HoughLineNeighboursUpdate(UINT32* count
+		, C_UINT32 thetaSize, C_UINT32 maxR
+		, C_UINT32 threshold);
+
+	void HoughCirclesCount(C_UCHAE* src
+		, C_UINT32 width, C_UINT32 height
+		, UINT32* count
+		, C_FLOAT minRadius, C_FLOAT maxRadius);
+
+	void HoughCirclePointCount(UINT32* count
+		, C_UINT32 width
+		, const Point& p1, const Point& p2);
+
+	void HoughCircleNeighboursUpdate(UINT32* count
+		, C_UINT32 width, C_UINT32 height
+		, C_UINT32 threshold);
+	// Hough end
 };
 
 template <class T>
@@ -438,6 +577,27 @@ void Library::SetHistogram24bit(C_UCHAE* src, T* histogram
 			histogram[(pix.G / interval + bin) % bin]++;
 			histogram[(pix.R / interval + bin + bin) % bin]++;
 		}
+	}
+}
+
+template <class T>
+void Library::SetNormalizedHistogram8bit(T* histogram
+	, C_UINT32 size
+	, C_FLOAT base)
+{
+	T max = 0;
+
+	for (UINT32 index = 0; index < size; index++)
+	{
+		max = max < histogram[index] ? histogram[index] : max;
+	}
+
+
+	float normalizedBase = static_cast<float>(base) / max;
+
+	for (UINT32 index = 0; index < size; index++)
+	{
+		histogram[index] = static_cast<T>(histogram[index] * normalizedBase);
 	}
 }
 

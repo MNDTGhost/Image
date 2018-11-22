@@ -11,7 +11,7 @@ void Segment::SegmentImage(C_UCHAE* src, UCHAE* pur
 	assert(graphTree != nullptr);
 	assert(graphTree->NumSets() == width * height);
 
-	C_UINT32 size = static_cast<int>(ceil(4 * sigma)) + 1;
+	C_UINT32 size = static_cast<UINT32>(ceil(4 * sigma)) + 1;
 	Library lib;
 
 	lib.BlurGauss24bit(src, pur
@@ -196,6 +196,7 @@ void Segment::Visualization(Image& image
 	pixs = nullptr;
 }
 
+
 void Segment::SelectiveSearch(C_UCHAE* src, UCHAE* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_FLOAT sigma, C_FLOAT threshold, C_UINT32 minSize)
@@ -203,12 +204,77 @@ void Segment::SelectiveSearch(C_UCHAE* src, UCHAE* pur
 	GraphTree* graphTree = new GraphTree(width * height);
 	Image srcImage(const_cast<UCHAE*>(src), width, height, MNDT::ImageType::BGR_24BIT);
 
+
 	SegmentImage(src, pur
 		, width, height
 		, sigma, threshold, minSize
 		, graphTree);
 
 	std::map<UINT32, Region> R = ExtractRegion(srcImage, graphTree);
+	std::vector<Neighbour> neighbours = ExtractNeighbours(R);
+	std::unordered_map<Neighbour, double> S;
+	C_UINT32 imgSize = width * height;
+
+	for (auto &neighbour : neighbours)
+	{
+		S[neighbour] = CalcSimilarity(R[neighbour.first], R[neighbour.second]
+			, imgSize);
+	}
+
+	while (!S.empty())
+	{
+		auto compare = [](const std::pair<Neighbour, double > n1, const std::pair<Neighbour, double > n2) { return n1.second < n2.second; };
+		auto maxNode = std::max_element(S.begin(), S.end(), compare);
+
+		UINT32 label1 = maxNode->first.first;
+		UINT32 label2 = maxNode->first.second;
+		UINT32 newLabel = R.rbegin()->first + 1;
+		Neighbour nowNeighbour = std::make_pair(label1, label2);
+
+		R[newLabel] = Region();
+		MergeRegions(R[newLabel], R[label1], R[label2], newLabel);
+
+		std::vector<Neighbour> keyToDelete;
+
+		for (auto& node : S)
+		{
+			const Neighbour& neighbour = node.first;
+
+			if (neighbour.first == label1
+				|| neighbour.second == label1
+				|| neighbour.first == label2
+				|| neighbour.second == label2)
+			{
+				keyToDelete.push_back(neighbour);
+			}
+		}
+
+		for (auto& key : keyToDelete)
+		{
+			S.erase(key);
+
+			if (key == nowNeighbour)
+			{
+				continue;
+			}
+
+			UINT32 noDeleteLabel = (key.first == label1 || key.first == label2) ? key.second : key.first;
+			S[std::make_pair(noDeleteLabel, newLabel)] = CalcSimilarity(R[noDeleteLabel], R[newLabel], imgSize);
+		}
+	}
+
+	Image purImage(pur, width, height, MNDT::ImageType::BGR_24BIT);
+
+	for (auto& node : R)
+	{
+		const Rect& rect = node.second.rect;
+		C_FLOAT diff = static_cast<float>(rect.Width()) / rect.Height();
+
+		if (diff > 0.6 && diff < 1.4)
+		{
+			MNDT::DrawRect24bit(purImage, rect, Pixel(255, 50, 50));
+		}
+	}
 
 	delete graphTree;
 	graphTree = nullptr;
@@ -219,8 +285,8 @@ void Segment::CalcSize(const Image& image
 	, GraphTree* graphTree)
 {
 	C_UINT32 width = image.Width();
-	C_UINT32 maxHeight = region.rect.EndY();
-	C_UINT32 maxWidth = region.rect.EndX();
+	C_UINT32 maxHeight = region.rect.EndY() + 1;
+	C_UINT32 maxWidth = region.rect.EndX() + 1;
 
 	for (UINT32 row = region.rect.Y(); row < maxHeight; row++)
 	{
@@ -252,9 +318,10 @@ void Segment::CalcTextureGradient(const Image& image, float* angle)
 
 	float* magnitude = new float[image.Width() * image.Height() * 3];
 
-	lib.CartToPolar24bit(Gx, Gy
+	lib.CartToPolar(Gx, Gy
 		, image.Width(), image.Height()
-		, magnitude, angle);
+		, magnitude, angle
+		, MNDT::ImageType::BGR_24BIT);
 
 	delete[] Gx;
 	Gx = nullptr;
@@ -278,8 +345,8 @@ void Segment::CalcColourHist(const Image& hsv
 	UINT32 hsvIndex = 0;
 
 	C_UINT32 width = hsv.Width();
-	C_UINT32 maxHeight = region.rect.EndY();
-	C_UINT32 maxWidth = region.rect.EndX();
+	C_UINT32 maxHeight = region.rect.EndY() + 1;
+	C_UINT32 maxWidth = region.rect.EndX() + 1;
 
 	for (UINT32 row = region.rect.Y(); row < maxHeight; row++)
 	{
@@ -319,8 +386,8 @@ void Segment::CalcTextureHist(const Image& image
 	C_UINT32 bin = 10;
 	C_UCHAE interval = 255 / bin;
 	C_UINT32 width = image.Width();
-	C_UINT32 maxHeight = region.rect.EndY();
-	C_UINT32 maxWidth = region.rect.EndX();
+	C_UINT32 maxHeight = region.rect.EndY() + 1;
+	C_UINT32 maxWidth = region.rect.EndX() + 1;
 	C_UINT32 diff = orientations * bin;
 
 	region.textureHist = new float[orientations * bin * 3]{ 0.0f };
@@ -354,9 +421,9 @@ void Segment::CalcTextureHist(const Image& image
 
 	for (UINT32 index = 0; index < orientations; index++)
 	{
-		lib.SetNormalizedHistogram8bit(region.textureHist + index * bin, bin);
-		lib.SetNormalizedHistogram8bit(region.textureHist + index * bin + diff, bin);
-		lib.SetNormalizedHistogram8bit(region.textureHist + index * bin + diff + diff, bin);
+		lib.SetNormalizedHistogram8bit(region.textureHist + index * bin, bin, MNDT::Normalized::L1);
+		lib.SetNormalizedHistogram8bit(region.textureHist + index * bin + diff, bin, MNDT::Normalized::L1);
+		lib.SetNormalizedHistogram8bit(region.textureHist + index * bin + diff + diff, bin, MNDT::Normalized::L1);
 	}
 
 
@@ -365,13 +432,13 @@ void Segment::CalcTextureHist(const Image& image
 std::map<UINT32, Region> Segment::ExtractRegion(const Image& image
 	, GraphTree* graphTree)
 {
-	C_UINT32 width = image.Width();
-	C_UINT32 height = image.Height();
+	C_INT32 width = image.Width();
+	C_INT32 height = image.Height();
 	std::map<UINT32, Region> R;
 
-	for (UINT32 row = 0; row < height; row++)
+	for (int32_t row = 0; row < height; row++)
 	{
-		for (UINT32 col = 0; col < width; col++)
+		for (int32_t col = 0; col < width; col++)
 		{
 			C_UINT32 label = graphTree->Find(row * width + col);
 
@@ -392,12 +459,12 @@ std::map<UINT32, Region> Segment::ExtractRegion(const Image& image
 				rect.Y(row);
 			}
 
-			if (rect.EndX() < col + 1)
+			if (rect.EndX() < col)
 			{
 				rect.Width(col - rect.X() + 1);
 			}
 
-			if (rect.EndY() < row + 1)
+			if (rect.EndY() < row)
 			{
 				rect.Height(row - rect.Y() + 1);
 			}
@@ -433,4 +500,120 @@ std::map<UINT32, Region> Segment::ExtractRegion(const Image& image
 	hsv = nullptr;
 
 	return R;
+}
+
+inline bool Segment::Intersecting(const Region &region1, const Region &region2) const
+{
+	return ((region1.rect & region2.rect).Area() > 0);
+}
+
+std::vector<Neighbour> Segment::ExtractNeighbours(const std::map<UINT32, Region>& R)
+{
+	std::vector<Neighbour> neighbours;
+
+	// 全部最多組合
+	neighbours.reserve((R.size() * (R.size() - 1)) >> 1);
+
+	for (auto region1 = R.cbegin(); region1 != R.cend(); region1++)
+	{
+		auto temp = region1;
+		temp++;
+
+		for (auto region2 = temp; region2 != R.cend(); region2++)
+		{
+			if (Intersecting(region1->second, region2->second))
+			{
+				C_UINT32 min = std::min(region1->first, region2->first);
+				C_UINT32 max = std::max(region1->first, region2->first);
+
+				neighbours.push_back(std::make_pair(min, max));
+			}
+		}
+	}
+	return neighbours;
+}
+
+double Segment::CalcSimOfColor(const Region &region1, const Region &region2)
+{
+	C_UINT32 bin = 25;
+	C_UINT32 size = bin * 3;
+	double sum = 0.0;
+
+	for (UINT32 index = 0; index < size; index++)
+	{
+		sum += std::min(*(region1.colorHist + index), *(region2.colorHist + index));
+	}
+
+	return sum;
+}
+
+double Segment::CalcSimOfTexture(const Region &region1, const Region &region2)
+{
+	C_UINT32 orientations = 8;
+	C_UINT32 bin = 10;
+	C_UINT32 size = orientations * bin * 3;
+	double sum = 0.0;
+
+	for (UINT32 index = 0; index < size; index++)
+	{
+		sum += std::min(*(region1.textureHist + index), *(region2.textureHist + index));
+	}
+
+	return sum;
+}
+
+inline double Segment::CalcSimOfSize(const Region &region1, const Region &region2
+	, C_UINT32 imgSize)
+{
+	return 1.0 - static_cast<double>((region1.size + region2.size)) / imgSize;
+}
+
+inline double Segment::CalcSimOfRect(const Region &region1, const Region &region2
+	, C_UINT32 imgSize)
+{
+	return 1.0 - static_cast<double>(((region1.rect | region2.rect).Area() - region1.size - region2.size)) / imgSize;
+}
+
+inline double Segment::CalcSimilarity(const Region &region1, const Region &region2
+	, C_UINT32 imgSize)
+{
+	return (CalcSimOfColor(region1, region2)
+		+ CalcSimOfTexture(region1, region2)
+		+ CalcSimOfSize(region1, region2, imgSize)
+		+ CalcSimOfRect(region1, region2, imgSize));
+}
+
+void Segment::HisMerge(float* mergeHis
+	, C_FLOAT* his1, C_FLOAT* his2
+	, C_UINT32 hisSize
+	, C_UINT32 region1Size, C_UINT32 region2Size)
+{
+	assert(mergeHis != nullptr);
+
+	C_UINT32 mergeSize = region1Size + region2Size;
+
+	for (UINT32 index = 0; index < hisSize; index++)
+	{
+		mergeHis[index] = static_cast<float>((his1[index] * region1Size + his2[index] * region2Size)) / mergeSize;
+	}
+}
+
+void Segment::MergeRegions(Region& region, const Region &region1, const Region &region2
+	, C_UINT32 label)
+{
+	region.rect = region1.rect | region2.rect;
+	region.size = region1.size + region2.size;
+	region.label = label;
+
+	region.colorHist = new float[25 * 3];
+	HisMerge(region.colorHist
+		, region1.colorHist, region2.colorHist
+		, 25 * 3
+		, region1.size, region2.size);
+
+	region.textureHist = new float[8 * 10 * 3];
+	HisMerge(region.textureHist
+		, region1.textureHist, region2.textureHist
+		, 8 * 10 * 3
+		, region1.size, region2.size);
 }

@@ -3,7 +3,8 @@
 #define SEGMENT_H
 #include "Library.h"
 #include "GraphTree.h"
-#include <map>
+
+typedef std::pair<UINT32, UINT32> Neighbour;
 
 typedef struct {
 	UINT32 centerIndex;
@@ -64,6 +65,22 @@ struct Region {
 
 };
 
+
+// hash
+namespace std
+{
+	template<>
+	class hash<Neighbour>
+	{
+	public:
+		std::size_t operator()(const Neighbour &data) const
+		{
+			return hash<UINT32>()(data.first) ^ hash<UINT32>()(data.second);
+		}
+	};
+}
+
+
 class Segment {
 public:
 
@@ -100,9 +117,6 @@ private:
 		, Edge* edges, C_UINT32 edgeSize
 		, C_FLOAT threshold);
 
-	std::map<UINT32, Region>ExtractRegion(const Image& image
-		, GraphTree* graphTree);
-
 	void CalcSize(const Image& image
 		, Region& region
 		, GraphTree* graphTree);
@@ -117,6 +131,34 @@ private:
 		, C_FLOAT* angle
 		, Region& region
 		, GraphTree* graphTree);
+
+	std::map<UINT32, Region>ExtractRegion(const Image& image
+		, GraphTree* graphTree);
+
+	inline bool Intersecting(const Region &region1, const Region &region2) const;
+
+	std::vector<Neighbour>ExtractNeighbours(const std::map<UINT32, Region>& R);
+
+	double CalcSimOfColor(const Region &region1, const Region &region2);
+
+	double CalcSimOfTexture(const Region &region1, const Region &region2);
+
+	inline double CalcSimOfSize(const Region &region1, const Region &region2
+		, C_UINT32 imgSize);
+
+	inline double CalcSimOfRect(const Region &region1, const Region &region2
+		, C_UINT32 imgSize);
+
+	inline double CalcSimilarity(const Region &region1, const Region &region2
+		, C_UINT32 imgSize);
+
+	void HisMerge(float* mergeHis
+		, C_FLOAT* his1, C_FLOAT* his2
+		, C_UINT32 hisSize
+		, C_UINT32 region1Size, C_UINT32 region2Size);
+
+	void MergeRegions(Region& region, const Region &region1, const Region &region2
+		, C_UINT32 label);
 };
 
 #endif
