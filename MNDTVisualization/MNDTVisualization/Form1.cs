@@ -13,7 +13,7 @@ namespace MNDTVisualization
     public partial class MNDT : Form
     {
         MNDTLibrary _lib = new MNDTLibrary();
-        private static string FILE_NAME = @"C:\Users\Ghost\Desktop\Lenna.jpg";
+        private static string FILE_NAME = @"C:\Users\Ghost\Desktop\Lenna2.jpg";
         private Bitmap _fileImage = new Bitmap(FILE_NAME);
         private Bitmap _nowImage = new Bitmap(FILE_NAME);
 
@@ -332,12 +332,12 @@ namespace MNDTVisualization
 
         private void btn_test_Click(object sender, EventArgs e)
         {
-            float sigma = 0.7f;
-            float threshold = 100f;
-            int minSize = 100;
-            // pic_pur.Image = _lib.SelectiveSearch(_fileImage, sigma, threshold, minSize);
-            //pic_pur.Image = _lib.SegmentImage(_fileImage, sigma, threshold, minSize);
-            _lib.HOGCellHistogram(_fileImage);
+            //float sigma = 0.7f;
+            //float threshold = 100f;
+            //int minSize = 100;
+            //// pic_pur.Image = _lib.SelectiveSearch(_fileImage, sigma, threshold, minSize);
+            ////pic_pur.Image = _lib.SegmentImage(_fileImage, sigma, threshold, minSize);
+            //_lib.HOGCellHistogram(_fileImage);
         }
 
         private void btn_24bit_sobel_Click(object sender, EventArgs e)
@@ -384,7 +384,9 @@ namespace MNDTVisualization
             SetCombinationImage(bitmap, "InvariantLBP");
 
             bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
-            pic_pur.Image = _lib.InvariantLBP(bitmap);
+            bitmap = _lib.InvariantLBP(bitmap);
+            pic_pur.Image = bitmap;
+            new ImageForm(bitmap, "InvariantLBP").Show();
         }
 
         private void btn_equivalent_lbp_Click(object sender, EventArgs e)
@@ -393,7 +395,9 @@ namespace MNDTVisualization
             SetCombinationImage(bitmap, "EquivalentLBP");
 
             bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
-            pic_pur.Image = _lib.EquivalentLBP(bitmap);
+            bitmap = _lib.EquivalentLBP(bitmap);
+            pic_pur.Image = bitmap;
+            new ImageForm(bitmap, "EquivalentLBP").Show();
         }
 
         private void btn_mb_lbp_Click(object sender, EventArgs e)
@@ -425,11 +429,11 @@ namespace MNDTVisualization
 
         private void btn_gamma_Click(object sender, EventArgs e)
         {
-            Bitmap bitmap = _lib.Gamma(_nowImage, 0.8);
+            Bitmap bitmap = _lib.Gamma(_nowImage, 1.5);
             SetCombinationImage(bitmap, "Gamma");
 
             bitmap = _lib.Change8BitColor(_fileImage, ColerType.BGR2GRAY_8BIT);
-            pic_pur.Image = _lib.Gamma(bitmap, 0.8);
+            pic_pur.Image = _lib.Gamma(bitmap, 1.5);
         }
 
         private void btn_gradient_hog_Click(object sender, EventArgs e)
@@ -483,6 +487,22 @@ namespace MNDTVisualization
             bitmap = _lib.HoughCircles(bitmap, 30, 70, 30);
             pic_pur.Image = bitmap;
             new ImageForm(bitmap, "HoughCircles").Show();
+        }
+
+        private void btn_segment_Click(object sender, EventArgs e)
+        {
+            float sigma = 0.7f;
+            float threshold = 100f;
+            int minSize = 100;
+            pic_pur.Image = _lib.SegmentImage(_fileImage, sigma, threshold, minSize);
+        }
+
+        private void btn_selective_search_Click(object sender, EventArgs e)
+        {
+            float sigma = 0.7f;
+            float threshold = 100f;
+            int minSize = 100;
+            pic_pur.Image = _lib.SelectiveSearch(_fileImage, sigma, threshold, minSize);
         }
     }
 }

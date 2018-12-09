@@ -4,14 +4,14 @@
 #include "general.h"
 
 struct Pixel {
-	UCHAE B, G, R;
-	Pixel(C_UCHAE& b, C_UCHAE g, C_UCHAE r) {
+	UCHAR B, G, R;
+	Pixel(C_UCHAR& b, C_UCHAR g, C_UCHAR r) {
 		B = b;
 		G = g;
 		R = r;
 	}
 
-	Pixel(C_UCHAE& gray) {
+	Pixel(C_UCHAR& gray) {
 		Pixel(gray, gray, gray);
 	}
 
@@ -31,7 +31,7 @@ public:
 		height		= Image height
 		type		= Image type
 	*/
-	Image(UCHAE* src
+	Image(UCHAR* src
 		, C_UINT32 width, C_UINT32 height
 		, MNDT::ImageType type);
 
@@ -41,12 +41,12 @@ public:
 
 	UINT32 Height() const;
 
-	void SetPixel(C_UINT32 row, C_UINT32 col, Pixel pix) const;
+	void SetPixel(C_UINT32 row, C_UINT32 col, Pixel pix);
 
 	Pixel GetPixel(C_UINT32 row, C_UINT32 col) const;
 
-	UCHAE** image;
-	UCHAE* data;
+	UCHAR** image;
+	UCHAR* data;
 private:
 	MNDT::ImageType _type;
 	UINT32 _width;

@@ -60,6 +60,8 @@
             this.btn_vertical = new System.Windows.Forms.Button();
             this.btn_horizontal = new System.Windows.Forms.Button();
             this.tabPage9 = new System.Windows.Forms.TabPage();
+            this.btn_hough_circle = new System.Windows.Forms.Button();
+            this.btn_hough_lines = new System.Windows.Forms.Button();
             this.btn_sobel_edge = new System.Windows.Forms.Button();
             this.btn_24bit_sobel = new System.Windows.Forms.Button();
             this.tabPage10 = new System.Windows.Forms.TabPage();
@@ -71,6 +73,7 @@
             this.btn_circular_lbp = new System.Windows.Forms.Button();
             this.btn_original_lbp = new System.Windows.Forms.Button();
             this.tabPage11 = new System.Windows.Forms.TabPage();
+            this.btn_hog_cell_view = new System.Windows.Forms.Button();
             this.btn_hog_block_view = new System.Windows.Forms.Button();
             this.btn_gradient_hog = new System.Windows.Forms.Button();
             this.btn_gamma = new System.Windows.Forms.Button();
@@ -114,9 +117,9 @@
             this.track_ycbcr_cb = new System.Windows.Forms.TrackBar();
             this.label15 = new System.Windows.Forms.Label();
             this.label16 = new System.Windows.Forms.Label();
-            this.btn_hog_cell_view = new System.Windows.Forms.Button();
-            this.btn_hough_lines = new System.Windows.Forms.Button();
-            this.btn_hough_circle = new System.Windows.Forms.Button();
+            this.tabPage12 = new System.Windows.Forms.TabPage();
+            this.btn_segment = new System.Windows.Forms.Button();
+            this.btn_selective_search = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pic_src)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pic_pur)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pic_now)).BeginInit();
@@ -147,6 +150,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.numeric_ycbcr_y)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.track_ycbcr_y)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.track_ycbcr_cb)).BeginInit();
+            this.tabPage12.SuspendLayout();
             this.SuspendLayout();
             // 
             // pic_src
@@ -219,6 +223,7 @@
             this.tabControl1.Controls.Add(this.tabPage9);
             this.tabControl1.Controls.Add(this.tabPage10);
             this.tabControl1.Controls.Add(this.tabPage11);
+            this.tabControl1.Controls.Add(this.tabPage12);
             this.tabControl1.Controls.Add(this.tabPage4);
             this.tabControl1.Location = new System.Drawing.Point(12, 12);
             this.tabControl1.Name = "tabControl1";
@@ -516,6 +521,28 @@
             this.tabPage9.Text = "邊緣偵測";
             this.tabPage9.UseVisualStyleBackColor = true;
             // 
+            // btn_hough_circle
+            // 
+            this.btn_hough_circle.Location = new System.Drawing.Point(324, 6);
+            this.btn_hough_circle.Name = "btn_hough_circle";
+            this.btn_hough_circle.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.btn_hough_circle.Size = new System.Drawing.Size(100, 44);
+            this.btn_hough_circle.TabIndex = 6;
+            this.btn_hough_circle.Text = "霍夫找圓";
+            this.btn_hough_circle.UseVisualStyleBackColor = true;
+            this.btn_hough_circle.Click += new System.EventHandler(this.btn_hough_circle_Click);
+            // 
+            // btn_hough_lines
+            // 
+            this.btn_hough_lines.Location = new System.Drawing.Point(218, 6);
+            this.btn_hough_lines.Name = "btn_hough_lines";
+            this.btn_hough_lines.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.btn_hough_lines.Size = new System.Drawing.Size(100, 44);
+            this.btn_hough_lines.TabIndex = 5;
+            this.btn_hough_lines.Text = "霍夫找線";
+            this.btn_hough_lines.UseVisualStyleBackColor = true;
+            this.btn_hough_lines.Click += new System.EventHandler(this.btn_hough_lines_Click);
+            // 
             // btn_sobel_edge
             // 
             this.btn_sobel_edge.Location = new System.Drawing.Point(112, 6);
@@ -643,6 +670,17 @@
             this.tabPage11.TabIndex = 8;
             this.tabPage11.Text = "HOG";
             this.tabPage11.UseVisualStyleBackColor = true;
+            // 
+            // btn_hog_cell_view
+            // 
+            this.btn_hog_cell_view.Location = new System.Drawing.Point(218, 6);
+            this.btn_hog_cell_view.Name = "btn_hog_cell_view";
+            this.btn_hog_cell_view.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.btn_hog_cell_view.Size = new System.Drawing.Size(100, 44);
+            this.btn_hog_cell_view.TabIndex = 6;
+            this.btn_hog_cell_view.Text = "Cell可視化";
+            this.btn_hog_cell_view.UseVisualStyleBackColor = true;
+            this.btn_hog_cell_view.Click += new System.EventHandler(this.btn_hog_cell_view_Click);
             // 
             // btn_hog_block_view
             // 
@@ -1105,38 +1143,38 @@
             this.label16.TabIndex = 36;
             this.label16.Text = "藍綠";
             // 
-            // btn_hog_cell_view
+            // tabPage12
             // 
-            this.btn_hog_cell_view.Location = new System.Drawing.Point(218, 6);
-            this.btn_hog_cell_view.Name = "btn_hog_cell_view";
-            this.btn_hog_cell_view.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.btn_hog_cell_view.Size = new System.Drawing.Size(100, 44);
-            this.btn_hog_cell_view.TabIndex = 6;
-            this.btn_hog_cell_view.Text = "Cell可視化";
-            this.btn_hog_cell_view.UseVisualStyleBackColor = true;
-            this.btn_hog_cell_view.Click += new System.EventHandler(this.btn_hog_cell_view_Click);
+            this.tabPage12.Controls.Add(this.btn_selective_search);
+            this.tabPage12.Controls.Add(this.btn_segment);
+            this.tabPage12.Location = new System.Drawing.Point(4, 25);
+            this.tabPage12.Name = "tabPage12";
+            this.tabPage12.Size = new System.Drawing.Size(979, 71);
+            this.tabPage12.TabIndex = 9;
+            this.tabPage12.Text = " 圖片分割";
+            this.tabPage12.UseVisualStyleBackColor = true;
             // 
-            // btn_hough_lines
+            // btn_segment
             // 
-            this.btn_hough_lines.Location = new System.Drawing.Point(218, 6);
-            this.btn_hough_lines.Name = "btn_hough_lines";
-            this.btn_hough_lines.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.btn_hough_lines.Size = new System.Drawing.Size(100, 44);
-            this.btn_hough_lines.TabIndex = 5;
-            this.btn_hough_lines.Text = "霍夫找線";
-            this.btn_hough_lines.UseVisualStyleBackColor = true;
-            this.btn_hough_lines.Click += new System.EventHandler(this.btn_hough_lines_Click);
+            this.btn_segment.Location = new System.Drawing.Point(6, 6);
+            this.btn_segment.Name = "btn_segment";
+            this.btn_segment.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.btn_segment.Size = new System.Drawing.Size(100, 44);
+            this.btn_segment.TabIndex = 3;
+            this.btn_segment.Text = "圖片分割";
+            this.btn_segment.UseVisualStyleBackColor = true;
+            this.btn_segment.Click += new System.EventHandler(this.btn_segment_Click);
             // 
-            // btn_hough_circle
+            // btn_selective_search
             // 
-            this.btn_hough_circle.Location = new System.Drawing.Point(324, 6);
-            this.btn_hough_circle.Name = "btn_hough_circle";
-            this.btn_hough_circle.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.btn_hough_circle.Size = new System.Drawing.Size(100, 44);
-            this.btn_hough_circle.TabIndex = 6;
-            this.btn_hough_circle.Text = "霍夫找圓";
-            this.btn_hough_circle.UseVisualStyleBackColor = true;
-            this.btn_hough_circle.Click += new System.EventHandler(this.btn_hough_circle_Click);
+            this.btn_selective_search.Location = new System.Drawing.Point(112, 6);
+            this.btn_selective_search.Name = "btn_selective_search";
+            this.btn_selective_search.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.btn_selective_search.Size = new System.Drawing.Size(100, 44);
+            this.btn_selective_search.TabIndex = 4;
+            this.btn_selective_search.Text = "圖片合併";
+            this.btn_selective_search.UseVisualStyleBackColor = true;
+            this.btn_selective_search.Click += new System.EventHandler(this.btn_selective_search_Click);
             // 
             // MNDT
             // 
@@ -1192,6 +1230,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.numeric_ycbcr_y)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.track_ycbcr_y)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.track_ycbcr_cb)).EndInit();
+            this.tabPage12.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1288,6 +1327,9 @@
         private System.Windows.Forms.Button btn_hog_cell_view;
         private System.Windows.Forms.Button btn_hough_lines;
         private System.Windows.Forms.Button btn_hough_circle;
+        private System.Windows.Forms.TabPage tabPage12;
+        private System.Windows.Forms.Button btn_segment;
+        private System.Windows.Forms.Button btn_selective_search;
     }
 }
 

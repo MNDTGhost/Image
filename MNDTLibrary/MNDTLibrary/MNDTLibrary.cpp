@@ -4,169 +4,170 @@
 #include "LBP.h"
 #include "HOG.h"
 #include "Segment.h"
+#include "Hough.h"
 
-extern "C" MNDTLIBRARY_API void mndtWrite(C_UCHAE* msg)
+extern "C" MNDTLIBRARY_API void mndtWrite(C_UCHAR* msg)
 {
 	MNDT::Write(msg);
 }
 
-extern "C" MNDTLIBRARY_API void mndtChangeColor(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtChangeColor(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_UINT32 type)
 {
-	Library lib;
-	lib.ChangeColor(src, pur
+	
+	MNDT::ChangeColor(src, pur
 		, width, height
 		, type);
 }
 
-extern "C" MNDTLIBRARY_API void mndtAdjustmentHSV(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtAdjustmentHSV(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_INT32 H, C_INT32 S, C_INT32 V)
 {
-	Library lib;
-	lib.AdjustmentHSV(src, pur
+	
+	MNDT::AdjustmentHSV(src, pur
 		, width, height
 		, H, S, V);
 }
 
-extern "C" MNDTLIBRARY_API void mndtAdjustmentYCbCr(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtAdjustmentYCbCr(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_INT32 Y, C_INT32 Cb, C_INT32 Cr)
 {
-	Library lib;
-	lib.AdjustmentYCbCr(src, pur
+	
+	MNDT::AdjustmentYCbCr(src, pur
 		, width, height
 		, Y, Cb, Cr);
 }
 
-extern "C" MNDTLIBRARY_API void mndtImagePadding8bit(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtImagePadding8bit(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_INT32 pad)
 {
-	Library lib;
-	lib.ImagePadding8bit(src, pur
+	
+	MNDT::ImagePadding8bit(src, pur
 		, width, height
 		, pad);
 }
 
-extern "C" MNDTLIBRARY_API void mndtImagePadding24bit(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtImagePadding24bit(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_INT32 pad)
 {
-	Library lib;
-	lib.ImagePadding24bit(src, pur
+	
+	MNDT::ImagePadding24bit(src, pur
 		, width, height
 		, pad);
 }
 
-extern "C" MNDTLIBRARY_API void mndtBlur8bit(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtBlur8bit(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_UINT32 size)
 {
-	Library lib;
-	lib.Blur8bit(src, pur
+	
+	MNDT::Blur8bit(src, pur
 		, width, height
 		, size);
 }
 
-extern "C" MNDTLIBRARY_API void mndtBlurGauss8bit(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtBlurGauss8bit(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_UINT32 size, C_FLOAT sigma)
 {
-	Library lib;
-	lib.BlurGauss8bit(src, pur
+	
+	MNDT::BlurGauss8bit(src, pur
 		, width, height
 		, size, sigma);
 }
 
-extern "C" MNDTLIBRARY_API void mndtBlurGauss24bit(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtBlurGauss24bit(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_UINT32 size, C_FLOAT sigma)
 {
-	Library lib;
-	lib.BlurGauss24bit(src, pur
+	
+	MNDT::BlurGauss24bit(src, pur
 		, width, height
 		, size, sigma);
 }
 
-extern "C" MNDTLIBRARY_API void mndtMedianBlur8bit(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtMedianBlur8bit(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_UINT32 size)
 {
-	Library lib;
-	lib.MedianBlur8bit(src, pur
+	
+	MNDT::MedianBlur8bit(src, pur
 		, width, height
 		, size);
 }
 
-extern "C" MNDTLIBRARY_API void mndtBilateralBlur8bit(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtBilateralBlur8bit(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_FLOAT spaceSigma, C_FLOAT colorSigma
 	, C_UINT32 size)
 {
-	Library lib;
-	lib.BilateralBlur8bit(src, pur
+	
+	MNDT::BilateralBlur8bit(src, pur
 		, width, height
 		, spaceSigma, colorSigma
 		, size);
 }
 
-extern "C" MNDTLIBRARY_API void mndtHistogram8bit(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtHistogram8bit(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height)
 {
-	Library lib;
-	lib.Histogram8bit(src, pur
+	
+	MNDT::Histogram8bit(src, pur
 		, width, height);
 }
 
-extern "C" MNDTLIBRARY_API void mndtHistogramEqualization8bit(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtHistogramEqualization8bit(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height)
 {
-	Library lib;
-	lib.HistogramEqualization8bit(src, pur
+	
+	MNDT::HistogramEqualization8bit(src, pur
 		, width, height);
 }
 
-extern "C" MNDTLIBRARY_API double mndtCompareHistogram(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API double mndtCompareHistogram(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height)
 {
-	Library lib;
-	return lib.CompareHistogram(src, pur
+	
+	return MNDT::CompareHistogram(src, pur
 		, width, height);
 }
 
-extern "C" MNDTLIBRARY_API void mndtChannel(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtChannel(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_UINT32 channel)
 {
-	Library lib;
-	lib.Channel(src, pur
+	
+	MNDT::Channel(src, pur
 		, width, height
 		, channel);
 }
 
-extern "C" MNDTLIBRARY_API void mndtBackProjection(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtBackProjection(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 srcWidth, C_UINT32 srcHeight
 	, C_UINT32* histogram
-	, C_UCHAE minRange, C_UCHAE maxRange
-	, C_UCHAE bin)
+	, C_UCHAR minRange, C_UCHAR maxRange
+	, C_UCHAR bin)
 {
-	Library lib;
-	lib.BackProjection(src, pur
+	
+	MNDT::BackProjection(src, pur
 		, srcWidth, srcHeight
 		, histogram
 		, minRange, maxRange
 		, bin);
 }
 
-extern "C" MNDTLIBRARY_API void mndtSetHistogram8bit(C_UCHAE* src, int32_t* histogram
+extern "C" MNDTLIBRARY_API void mndtSetHistogram8bit(C_UCHAR* src, int32_t* histogram
 	, C_UINT32 hisWidth, C_UINT32 hisHeight
-	, C_UCHAE minRange, C_UCHAE maxRange
-	, C_UCHAE bin)
+	, C_UCHAR minRange, C_UCHAR maxRange
+	, C_UCHAR bin)
 {
-	Library lib;
-	lib.SetHistogram8bit(src, histogram
+	
+	MNDT::SetHistogram8bit(src, histogram
 		, hisWidth, hisHeight
 		, minRange, maxRange
 		, bin);
@@ -174,73 +175,73 @@ extern "C" MNDTLIBRARY_API void mndtSetHistogram8bit(C_UCHAE* src, int32_t* hist
 
 extern "C" MNDTLIBRARY_API void mndtSetNormalizedHistogram8bit(int32_t* histogram
 	, C_UINT32 bin
-	, C_UCHAE maxRange)
+	, C_UCHAR maxRange)
 {
-	Library lib;
-	lib.SetNormalizedHistogram8bit(histogram
+	
+	MNDT::SetNormalizedHistogram8bit(histogram
 		, bin
 		, maxRange);
 }
 
-extern "C" MNDTLIBRARY_API void mndtThreshold8bit(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtThreshold8bit(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_UINT32 thresh)
 {
-	Library lib;
-	lib.Threshold8bit(src, pur
+	
+	MNDT::Threshold8bit(src, pur
 		, width, height
 		, thresh);
 }
 
-extern "C" MNDTLIBRARY_API void mndtMeanShift(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtMeanShift(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_UINT32* rectPoint
 	, C_UINT32 times
 	, C_DOUBLE threshold)
 {
-	Library lib;
-	lib.MeanShift(src, pur
+	
+	MNDT::MeanShift(src, pur
 		, width, height
 		, rectPoint
 		, times
 		, threshold);
 }
 
-extern "C" MNDTLIBRARY_API void mndtRotate8bit(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtRotate8bit(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_UINT32 type)
 {
-	Library lib;
-	lib.Rotate8bit(src, pur
+	
+	MNDT::Rotate8bit(src, pur
 		, width, height
 		, static_cast<MNDT::RotateType>(type));
 }
 
-extern "C" MNDTLIBRARY_API void mndtResize8bit(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtResize8bit(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_UINT32 reWidth, C_UINT32 reHeight
 	, C_UINT32 type)
 {
-	Library lib;
-	lib.Resize8bit(src, pur
+	
+	MNDT::Resize8bit(src, pur
 		, width, height
 		, reWidth, reHeight
 		, (MNDT::ResizeType)type);
 }
 
-extern "C" MNDTLIBRARY_API void mndtPyramidDown8bit(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtPyramidDown8bit(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height)
 {
-	Library lib;
-	lib.PyramidDown8bit(src, pur
+	
+	MNDT::PyramidDown8bit(src, pur
 		, width, height);
 }
 
-extern "C" MNDTLIBRARY_API void mndtPyramidUp8bit(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtPyramidUp8bit(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height)
 {
-	Library lib;
-	lib.PyramidUp8bit(src, pur
+	
+	MNDT::PyramidUp8bit(src, pur
 		, width, height);
 }
 
@@ -257,8 +258,8 @@ extern "C" MNDTLIBRARY_API void mndtSetAffineTransform(C_FLOAT* affine
 		affine += col;
 	}
 
-	Library lib;
-	lib.SetAffineTransform(affine2D
+	
+	MNDT::SetAffineTransform(affine2D
 		, baseX, baseY
 		, row, col);
 
@@ -272,35 +273,35 @@ extern "C" MNDTLIBRARY_API void mndtSetAffineTransform(C_FLOAT* affine
 	affine2D = nullptr;
 }
 
-extern "C" MNDTLIBRARY_API void mndtAffine8bit(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtAffine8bit(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, float* baseX, float* baseY)
 {
-	Library lib;
-	lib.Affine8bit(src, pur
+	
+	MNDT::Affine8bit(src, pur
 		, width, height
 		, baseX, baseY);
 }
 
-extern "C" MNDTLIBRARY_API void mndtSobel24bit(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtSobel24bit(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, const bool dx, const bool dy)
 {
-	Library lib;
-	lib.SobelVisualization24bit(src, pur
+	
+	MNDT::SobelVisualization24bit(src, pur
 		, width, height
 		, dx, dy);
 }
 
-extern "C" MNDTLIBRARY_API void mndtSobelEdge8bit(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtSobelEdge8bit(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height)
 {
-	Library lib;
-	lib.SobelEdgeView8bit(src, pur
+	
+	MNDT::SobelEdgeView8bit(src, pur
 		, width, height);
 }
 
-extern "C" MNDTLIBRARY_API void mndtSegmentImage(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtSegmentImage(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_FLOAT sigma, C_FLOAT threshold, C_UINT32 minSize
 	, UINT32* numCss)
@@ -323,7 +324,7 @@ extern "C" MNDTLIBRARY_API void mndtSegmentImage(C_UCHAE* src, UCHAE* pur
 	graphTree = nullptr;
 }
 
-extern "C" MNDTLIBRARY_API void mndtSelectiveSearch(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtSelectiveSearch(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_FLOAT sigma, C_FLOAT threshold, C_UINT32 minSize
 	, UINT32* numCss)
@@ -335,7 +336,7 @@ extern "C" MNDTLIBRARY_API void mndtSelectiveSearch(C_UCHAE* src, UCHAE* pur
 		, sigma, threshold, minSize);
 }
 
-extern "C" MNDTLIBRARY_API void mndtOriginalLBP(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtOriginalLBP(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height)
 {
 	LBP lbp;
@@ -344,7 +345,7 @@ extern "C" MNDTLIBRARY_API void mndtOriginalLBP(C_UCHAE* src, UCHAE* pur
 		, width, height);
 }
 
-extern "C" MNDTLIBRARY_API void mndtCircularLBP(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtCircularLBP(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height)
 {
 	LBP lbp;
@@ -353,7 +354,7 @@ extern "C" MNDTLIBRARY_API void mndtCircularLBP(C_UCHAE* src, UCHAE* pur
 		, width, height);
 }
 
-extern "C" MNDTLIBRARY_API void mndtInvariantLBP(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtInvariantLBP(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height)
 {
 	LBP lbp;
@@ -362,7 +363,7 @@ extern "C" MNDTLIBRARY_API void mndtInvariantLBP(C_UCHAE* src, UCHAE* pur
 		, width, height);
 }
 
-extern "C" MNDTLIBRARY_API void mndtEquivalentLBP(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtEquivalentLBP(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height)
 {
 	LBP lbp;
@@ -371,7 +372,7 @@ extern "C" MNDTLIBRARY_API void mndtEquivalentLBP(C_UCHAE* src, UCHAE* pur
 		, width, height);
 }
 
-extern "C" MNDTLIBRARY_API void mndtMultiScaleBlockLBP(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtMultiScaleBlockLBP(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height)
 {
 	LBP lbp;
@@ -380,7 +381,7 @@ extern "C" MNDTLIBRARY_API void mndtMultiScaleBlockLBP(C_UCHAE* src, UCHAE* pur
 		, width, height);
 }
 
-extern "C" MNDTLIBRARY_API void mndtSEMultiScaleBlockLBP(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtSEMultiScaleBlockLBP(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height)
 {
 	LBP lbp;
@@ -389,7 +390,7 @@ extern "C" MNDTLIBRARY_API void mndtSEMultiScaleBlockLBP(C_UCHAE* src, UCHAE* pu
 		, width, height);
 }
 
-extern "C" MNDTLIBRARY_API void mndtLBPHistogram(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtLBPHistogram(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_UINT32 gridX, C_UINT32 gridY
 	, C_UINT32 bin)
@@ -402,18 +403,18 @@ extern "C" MNDTLIBRARY_API void mndtLBPHistogram(C_UCHAE* src, UCHAE* pur
 		, bin);
 }
 
-extern "C" MNDTLIBRARY_API void mndtGamma(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtGamma(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_DOUBLE gamma)
 {
-	Library lib;
+	
 
-	lib.Gamma8bit(src, pur
+	MNDT::Gamma8bit(src, pur
 		, width, height
 		, gamma);
 }
 
-extern "C" MNDTLIBRARY_API void mndtHOGGradient(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtHOGGradient(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height)
 {
 	HOG hog;
@@ -422,7 +423,7 @@ extern "C" MNDTLIBRARY_API void mndtHOGGradient(C_UCHAE* src, UCHAE* pur
 		, width, height);
 }
 
-extern "C" MNDTLIBRARY_API void mndtHOGCellHistogram(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtHOGCellHistogram(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_UINT32 cellX, C_UINT32 cellY)
 {
@@ -437,7 +438,7 @@ extern "C" MNDTLIBRARY_API void mndtHOGCellHistogram(C_UCHAE* src, UCHAE* pur
 	histogram = nullptr;
 }
 
-extern "C" MNDTLIBRARY_API void mndtHOGBlockHistogram(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtHOGBlockHistogram(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_UINT32 cellX, C_UINT32 cellY
 	, C_UINT32 blockX, C_UINT32 blockY)
@@ -453,7 +454,7 @@ extern "C" MNDTLIBRARY_API void mndtHOGBlockHistogram(C_UCHAE* src, UCHAE* pur
 }
 
 
-extern "C" MNDTLIBRARY_API void mndtHOGView(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtHOGView(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_UINT32 cellX, C_UINT32 cellY
 	, C_UINT32 blockX, C_UINT32 blockY)
@@ -464,7 +465,7 @@ extern "C" MNDTLIBRARY_API void mndtHOGView(C_UCHAE* src, UCHAE* pur
 		, width, height);
 }
 
-extern "C" MNDTLIBRARY_API void mndtHOGCellView(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtHOGCellView(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_UINT32 cellX, C_UINT32 cellY)
 {
@@ -474,7 +475,7 @@ extern "C" MNDTLIBRARY_API void mndtHOGCellView(C_UCHAE* src, UCHAE* pur
 		, width, height);
 }
 
-extern "C" MNDTLIBRARY_API void mndtHOGBlockView(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtHOGBlockView(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_UINT32 cellX, C_UINT32 cellY
 	, C_UINT32 blockX, C_UINT32 blockY)
@@ -486,24 +487,24 @@ extern "C" MNDTLIBRARY_API void mndtHOGBlockView(C_UCHAE* src, UCHAE* pur
 }
 
 
-extern "C" MNDTLIBRARY_API void mndtHoughLines(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtHoughLines(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_FLOAT rho, C_FLOAT theta, C_UINT32 threshold)
 {
-	Library lib;
+	
 
-	lib.HoughLines(src, pur
+	MNDT::HoughLines(src, pur
 		, width, height
 		, rho, theta, threshold);
 }
 
-extern "C" MNDTLIBRARY_API void mndtHoughCircles(C_UCHAE* src, UCHAE* pur
+extern "C" MNDTLIBRARY_API void mndtHoughCircles(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_FLOAT minRadius, C_FLOAT maxRadius, C_UINT32 threshold)
 {
-	Library lib;
+	
 
-	lib.HoughCircles(src, pur
+	MNDT::HoughCircles(src, pur
 		, width, height
 		, minRadius, maxRadius, threshold);
 }

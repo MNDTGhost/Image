@@ -8,32 +8,34 @@ LBP::~LBP()
 {
 }
 
-void LBP::OriginalLBP(C_UCHAE* src, UCHAE* pur
+void LBP::OriginalLBP(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height)
 {
+	// 1. padding
 	C_UINT32 padWidth = width + 2;
 	C_UINT32 padHeight = height + 2;
-	UCHAE* padData = new UCHAE[padWidth * padHeight]{ 0 };
-	Library lib;
+	UCHAR* padData = new UCHAR[padWidth * padHeight]{ 0 };
 
-	lib.ImagePadding8bit(src, padData, width, height, 1);
+	MNDT::ImagePadding8bit(src, padData, width, height, 1);
 
+
+	// 2. calculate original lbp
 	Image padImage(padData, padWidth, padHeight, MNDT::ImageType::GRAY_8BIT);
 
 	for (UINT32 row = 1; row < padHeight - 1; row++)
 	{
 		for (UINT32 col = 1; col < padWidth - 1; col++)
 		{
-			UCHAE sum = 0;
+			UCHAR sum = 0;
 
-			sum |= static_cast<UCHAE>(padImage.image[row - 1][col - 1] > padImage.image[row][col]) << 7;
-			sum |= static_cast<UCHAE>(padImage.image[row - 1][col] > padImage.image[row][col]) << 6;
-			sum |= static_cast<UCHAE>(padImage.image[row - 1][col + 1] > padImage.image[row][col]) << 5;
-			sum |= static_cast<UCHAE>(padImage.image[row][col + 1] > padImage.image[row][col]) << 4;
-			sum |= static_cast<UCHAE>(padImage.image[row + 1][col + 1] > padImage.image[row][col]) << 3;
-			sum |= static_cast<UCHAE>(padImage.image[row + 1][col] > padImage.image[row][col]) << 2;
-			sum |= static_cast<UCHAE>(padImage.image[row + 1][col - 1] > padImage.image[row][col]) << 1;
-			sum |= static_cast<UCHAE>(padImage.image[row][col - 1] > padImage.image[row][col]);
+			sum |= static_cast<UCHAR>(padImage.image[row - 1][col - 1] > padImage.image[row][col]) << 7;
+			sum |= static_cast<UCHAR>(padImage.image[row - 1][col] > padImage.image[row][col]) << 6;
+			sum |= static_cast<UCHAR>(padImage.image[row - 1][col + 1] > padImage.image[row][col]) << 5;
+			sum |= static_cast<UCHAR>(padImage.image[row][col + 1] > padImage.image[row][col]) << 4;
+			sum |= static_cast<UCHAR>(padImage.image[row + 1][col + 1] > padImage.image[row][col]) << 3;
+			sum |= static_cast<UCHAR>(padImage.image[row + 1][col] > padImage.image[row][col]) << 2;
+			sum |= static_cast<UCHAR>(padImage.image[row + 1][col - 1] > padImage.image[row][col]) << 1;
+			sum |= static_cast<UCHAR>(padImage.image[row][col - 1] > padImage.image[row][col]);
 
 			*pur = sum;
 			pur++;
@@ -45,17 +47,19 @@ void LBP::OriginalLBP(C_UCHAE* src, UCHAE* pur
 	padData = nullptr;
 }
 
-void LBP::CircularLBP(C_UCHAE* src, UCHAE* pur
+void LBP::CircularLBP(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_UINT32 radius, C_UINT32 bin)
 {
+	// 1. padding
 	C_UINT32 padWidth = width + (radius << 1);
 	C_UINT32 padHeight = height + (radius << 1);
-	UCHAE* padData = new UCHAE[padWidth * padHeight]{ 0 };
-	Library lib;
+	UCHAR* padData = new UCHAR[padWidth * padHeight]{ 0 };
 
-	lib.ImagePadding8bit(src, padData, width, height, radius);
+	MNDT::ImagePadding8bit(src, padData, width, height, radius);
 
+
+	// 2. calculate offset
 	Image padImage(padData, padWidth, padHeight, MNDT::ImageType::GRAY_8BIT);
 	Image purImage(pur, width, height, MNDT::ImageType::GRAY_8BIT);
 
@@ -80,17 +84,18 @@ void LBP::CircularLBP(C_UCHAE* src, UCHAE* pur
 		C_FLOAT w3 = (1.0f - xOffset) * yOffset;
 		C_FLOAT w4 = xOffset * yOffset;
 
+		// 3. calcuulate pixel
 		for (UINT32 row = radius; row < padHeight - radius; row++)
 		{
 			for (UINT32 col = radius; col < padWidth - radius; col++)
 			{
-				UCHAE pix = 0;
-				pix = static_cast<UCHAE>(padImage.image[row + y1][col + x1] * w1
+				UCHAR pix = 0;
+				pix = static_cast<UCHAR>(padImage.image[row + y1][col + x1] * w1
 					+ padImage.image[row + y1][col + x2] * w2
 					+ padImage.image[row + y2][col + x1] * w3
 					+ padImage.image[row + y2][col + x2] * w4);
 
-				purImage.image[row - radius][col - radius] |= (static_cast<UCHAE>(pix > padImage.image[row][col]) << offsetBase);
+				purImage.image[row - radius][col - radius] |= (static_cast<UCHAR>(pix > padImage.image[row][col]) << offsetBase);
 			}
 		}
 		offsetBase--;
@@ -100,14 +105,16 @@ void LBP::CircularLBP(C_UCHAE* src, UCHAE* pur
 	padData = nullptr;
 }
 
-void  LBP::InvariantLBP(C_UCHAE* src, UCHAE* pur
+void  LBP::InvariantLBP(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_INT32 radius, C_UINT32 bin)
 {
+	// 1. get circular lbp 
 	CircularLBP(src, pur
 		, width, height
 		, radius, bin);
 
+	// 2. calculate invariant
 	Image purImage(pur, width, height, MNDT::ImageType::GRAY_8BIT);
 
 	for (UINT32 row = 0; row < height; row++)
@@ -115,12 +122,12 @@ void  LBP::InvariantLBP(C_UCHAE* src, UCHAE* pur
 		for (UINT32 col = 0; col < width; col++)
 		{
 			// 使用位移(二進位)方式循環一次
-			UCHAE originalPix = purImage.image[row][col];
-			UCHAE minPix = originalPix;
+			UCHAR originalPix = purImage.image[row][col];
+			UCHAR minPix = originalPix;
 
 			for (UINT32 index = 1; index < bin; index++)
 			{
-				C_UCHAE temp = (originalPix >> index) | (originalPix << index);
+				C_UCHAR temp = (originalPix >> index) | (originalPix << index);
 				if (minPix > temp)
 				{
 					minPix = temp;
@@ -130,21 +137,27 @@ void  LBP::InvariantLBP(C_UCHAE* src, UCHAE* pur
 			purImage.image[row][col] = minPix;
 		}
 	}
-
 }
 
-void LBP::EquivalentLBP(C_UCHAE* src, UCHAE* pur
+void LBP::EquivalentLBP(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_INT32 radius, C_UINT32 bin)
 {
+	// 1. get circular lbp 
 	CircularLBP(src, pur
 		, width, height
 		, radius, bin);
 
-	Image purImage(pur, width, height, MNDT::ImageType::GRAY_8BIT);
-	UCHAE table[256] = { 0 };
+
+	// 2. set everyone equivalent of the pixels
+	UCHAR table[256] = { 0 };
 
 	EquivalentTable(table);
+
+
+
+	// 3. change to equivalent lbp
+	Image purImage(pur, width, height, MNDT::ImageType::GRAY_8BIT);
 
 	for (UINT32 row = 0; row < height; row++)
 	{
@@ -155,9 +168,9 @@ void LBP::EquivalentLBP(C_UCHAE* src, UCHAE* pur
 	}
 }
 
-void LBP::EquivalentTable(UCHAE* table)
+void LBP::EquivalentTable(UCHAR* table)
 {
-	UCHAE pix = 1;
+	UCHAR pix = 1;
 
 	for (UINT32 index = 0; index < 256; index++)
 	{
@@ -180,7 +193,7 @@ void LBP::EquivalentTable(UCHAE* table)
 	}
 }
 
-void  LBP::MultiScaleBlockLBP(C_UCHAE* src, UCHAE* pur
+void  LBP::MultiScaleBlockLBP(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_INT32 scale)
 {
@@ -189,12 +202,15 @@ void  LBP::MultiScaleBlockLBP(C_UCHAE* src, UCHAE* pur
 	C_INT32 cellRadius = cellSize >> 1;
 	C_UINT32 padWidth = width + (cellRadius << 1);
 	C_UINT32 padHeight = height + (cellRadius << 1);
-	UCHAE* avgData = new UCHAE[width * height]{ 0 };
-	UCHAE* padData = new UCHAE[padWidth * padHeight]{ 0 };
-	Library lib;
+	UCHAR* avgData = new UCHAR[width * height]{ 0 };
+	UCHAR* padData = new UCHAR[padWidth * padHeight]{ 0 };
 
-	lib.ImagePadding8bit(src, padData, width, height, cellRadius);
+	// 1. padding
+	MNDT::ImagePadding8bit(src, padData, width, height, cellRadius);
 
+
+
+	// 2. calculate pixel of avg
 	Image padImage(padData, padWidth, padHeight, MNDT::ImageType::GRAY_8BIT);
 	Image avgImage(avgData, width, height, MNDT::ImageType::GRAY_8BIT);
 
@@ -212,51 +228,62 @@ void  LBP::MultiScaleBlockLBP(C_UCHAE* src, UCHAE* pur
 				}
 			}
 
-			avgImage.image[row - cellRadius][col - cellRadius] = static_cast<UCHAE>(sum / (cellRadius * cellRadius));
+			avgImage.image[row - cellRadius][col - cellRadius] = static_cast<UCHAR>(sum / (cellSize * cellSize));
 		}
 	}
 
 	delete[] padData;
 	padData = nullptr;
 
+
+	// 3. calculate original lbp
 	OriginalLBP(avgData, pur, width, height);
 
 	delete[] avgData;
 	avgData = nullptr;
 }
 
-void  LBP::SEMultiScaleBlockLBP(C_UCHAE* src, UCHAE* pur
+void  LBP::SEMultiScaleBlockLBP(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_INT32 scale)
 {
-	UCHAE* MBLBPData = new UCHAE[width * height]{ 0 };
+	// 1. get block lbp
+	UCHAR* MBLBPData = new UCHAR[width * height]{ 0 };
 
 	MultiScaleBlockLBP(src, MBLBPData
 		, width, height
 		, scale);
 
-	Library lib;
+
+	// 2. get histogram of the block lbp
 	int32_t histogram[256] = { 0 };
 	int32_t sortHistogram[256] = { 0 };
 
-	lib.SetHistogram8bit(MBLBPData, histogram
+	MNDT::SetHistogram8bit(MBLBPData, histogram
 		, width, height);
+
+
+	// 3. copy and sort the histogram
 	memcpy(sortHistogram, histogram, 256 * sizeof(int32_t));
 	std::sort(sortHistogram, sortHistogram + 256);
 
-	UCHAE table[256] = { 0 };
 
-	for (UINT32 index = 0; index < 64; index++)
+	// 4. found top 64 of the sort histogram
+	UCHAR table[256] = { 0 };
+
+	for (UINT32 index = 0; index < 63; index++)
 	{
 		for (UINT32 hisIndex = 0; hisIndex < 256; hisIndex++)
 		{
-			if (sortHistogram[index] == histogram[hisIndex])
+			if (sortHistogram[255 - index] == histogram[hisIndex])
 			{
 				table[hisIndex] = index;
 			}
 		}
 	}
 
+
+	// 5. set new pixel
 	UINT32 size = height * width;
 
 	for (UINT32 index = 0; index < size; index++)
@@ -268,16 +295,18 @@ void  LBP::SEMultiScaleBlockLBP(C_UCHAE* src, UCHAE* pur
 	MBLBPData = nullptr;
 }
 
-void LBP::LBPHistogram(C_UCHAE* src, UCHAE* pur
+void LBP::LBPHistogram(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_UINT32 gridX, C_UINT32 gridY
 	, C_UINT32 bin)
 {
-	Image srcImage(const_cast<UCHAE*>(src), width, height, MNDT::ImageType::GRAY_8BIT);
+	// 1. init params
+	Image srcImage(const_cast<UCHAR*>(src), width, height, MNDT::ImageType::GRAY_8BIT);
 	C_UINT32 cellWidth = width / gridX;
 	C_UINT32 cellHeight = height / gridY;
 	float* histogram = new float[gridX * gridY * bin]{ 0 };
 
+	// 2. calculate histogram
 	for (UINT32 row = 0; row < height; row++)
 	{
 		UINT32 hisRowIndex = row / cellHeight * gridX;
@@ -291,12 +320,12 @@ void LBP::LBPHistogram(C_UCHAE* src, UCHAE* pur
 		}
 	}
 
-	Library lib;
+	// 3. normalized histogram
 	C_UINT32 histogramSize = gridX * gridY;
 
 	for (UINT32 index = 0; index < histogramSize; index++)
 	{
-		lib.SetNormalizedHistogram8bit(histogram + index * bin, bin, MNDT::Normalized::L1);
+		MNDT::SetNormalizedHistogram8bit(histogram + index * bin, bin, MNDT::Normalized::L1);
 	}
 
 	//C_UINT32 allSize = gridX * gridY * bin;

@@ -11,9 +11,9 @@
 //#define NDEBUG
 #include <assert.h>
 
-typedef unsigned char UCHAE;
-typedef const unsigned char C_UCHAE;
-typedef const char C_CHAE;
+typedef unsigned char UCHAR;
+typedef const unsigned char C_UCHAR;
+typedef const char C_CHAR;
 typedef unsigned __int32 UINT32;
 typedef const unsigned __int32 C_UINT32;
 typedef const __int32 C_INT32;

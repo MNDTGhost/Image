@@ -1,6 +1,6 @@
 #include "Segment.h"
 
-void Segment::SegmentImage(C_UCHAE* src, UCHAE* pur
+void Segment::SegmentImage(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_FLOAT sigma, C_FLOAT threshold, C_UINT32 minSize
 	, GraphTree* graphTree)
@@ -12,9 +12,8 @@ void Segment::SegmentImage(C_UCHAE* src, UCHAE* pur
 	assert(graphTree->NumSets() == width * height);
 
 	C_UINT32 size = static_cast<UINT32>(ceil(4 * sigma)) + 1;
-	Library lib;
 
-	lib.BlurGauss24bit(src, pur
+	MNDT::BlurGauss24bit(src, pur
 		, width, height
 		, size, sigma);
 
@@ -22,7 +21,7 @@ void Segment::SegmentImage(C_UCHAE* src, UCHAE* pur
 	Edge* edges = new Edge[width * height * 4];
 	UINT32 edgeSize = 0;
 
-	// 取得每個點的左和上排連結
+	// 1. get neighbors
 	for (UINT32 row = 0; row < height; row++)
 	{
 		for (UINT32 col = 0; col < width; col++)
@@ -31,45 +30,6 @@ void Segment::SegmentImage(C_UCHAE* src, UCHAE* pur
 			Pixel nowPix = purImage.GetPixel(row, col);
 			Edge* edge = nullptr;
 
-			//// right
-			//if (col < width - 1)
-			//{
-			//	edge = &edges[edgeSize];
-			//	edge->centerIndex = nowIndex;
-			//	edge->linkIndex = row * width + col + 1;
-			//	edge->weights = Diff(nowPix, purImage.GetPixel(row, col + 1));
-			//	edgeSize++;
-			//}
-
-			//// top left
-			//if (row < height - 1)
-			//{
-			//	edge = &edges[edgeSize];
-			//	edge->centerIndex = nowIndex;
-			//	edge->linkIndex = (row + 1) * width + col;
-			//	edge->weights = Diff(nowPix, purImage.GetPixel(row + 1, col));
-			//	++edgeSize;
-			//}
-
-			//// top right
-			//if ((col < width - 1) && (row < height - 1))
-			//{
-			//	edge = &edges[edgeSize];
-			//	edge->centerIndex = nowIndex;
-			//	edge->linkIndex = (row + 1) * width + col + 1;
-			//	edge->weights = Diff(nowPix, purImage.GetPixel(row + 1, col + 1));
-			//	++edgeSize;
-			//}
-
-			//// left
-			//if ((col < width - 1) && (row > 0))
-			//{
-			//	edge = &edges[edgeSize];
-			//	edge->centerIndex = nowIndex;
-			//	edge->linkIndex = (row - 1) * width + col + 1;
-			//	edge->weights = Diff(nowPix, purImage.GetPixel(row - 1, col + 1));
-			//	++edgeSize;
-			//}
 			// top
 			if (row > 0)
 			{
@@ -114,12 +74,13 @@ void Segment::SegmentImage(C_UCHAE* src, UCHAE* pur
 
 
 
+	// step 2.3
 	// 連通法
 	SegmentGraph(graphTree
 		, edges, edgeSize
 		, threshold);
 
-	// 合併小於最小尺寸
+	// 4. merge region if the region is smaller than minSize params
 	for (UINT32 index = 0; index < edgeSize; index++)
 	{
 		const Edge& edge = edges[index];
@@ -141,6 +102,7 @@ void Segment::SegmentGraph(GraphTree* graphTree
 	, Edge* edges, C_UINT32 edgeSize
 	, C_FLOAT threshold)
 {
+	// 2. sort
 	std::sort(edges, edges + edgeSize
 		, [](const Edge& edge1, const Edge& edge2) { return edge1.weights < edge2.weights; });
 
@@ -151,6 +113,7 @@ void Segment::SegmentGraph(GraphTree* graphTree
 		thresholds[index] = Threshold(threshold, 1);
 	}
 
+	// 3. merge region
 	for (UINT32 index = 0; index < edgeSize; index++)
 	{
 		const Edge& edge = edges[index];
@@ -197,12 +160,12 @@ void Segment::Visualization(Image& image
 }
 
 
-void Segment::SelectiveSearch(C_UCHAE* src, UCHAE* pur
+void Segment::SelectiveSearch(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, C_FLOAT sigma, C_FLOAT threshold, C_UINT32 minSize)
 {
 	GraphTree* graphTree = new GraphTree(width * height);
-	Image srcImage(const_cast<UCHAE*>(src), width, height, MNDT::ImageType::BGR_24BIT);
+	Image srcImage(const_cast<UCHAR*>(src), width, height, MNDT::ImageType::BGR_24BIT);
 
 
 	SegmentImage(src, pur
@@ -304,21 +267,20 @@ void Segment::CalcSize(const Image& image
 
 void Segment::CalcTextureGradient(const Image& image, float* angle)
 {
-	Library lib;
 	int32_t* Gx = new int32_t[image.Width() * image.Height() * 3];
 	int32_t* Gy = new int32_t[image.Width() * image.Height() * 3];
 
-	lib.Sobel24bit(image.data, Gx
+	MNDT::Sobel24bit(image.data, Gx
 		, image.Width(), image.Height()
 		, true, false);
 
-	lib.Sobel24bit(image.data, Gy
+	MNDT::Sobel24bit(image.data, Gy
 		, image.Width(), image.Height()
 		, false, true);
 
 	float* magnitude = new float[image.Width() * image.Height() * 3];
 
-	lib.CartToPolar(Gx, Gy
+	MNDT::CartToPolar(Gx, Gy
 		, image.Width(), image.Height()
 		, magnitude, angle
 		, MNDT::ImageType::BGR_24BIT);
@@ -340,7 +302,7 @@ void Segment::CalcColourHist(const Image& hsv
 	assert(region.colorHist == nullptr);
 
 	C_UINT32 regionWidth = region.size * 3;
-	UCHAE* hsvData = new UCHAE[regionWidth];
+	UCHAR* hsvData = new UCHAR[regionWidth];
 	Image hsvImage(hsvData, regionWidth, 1, MNDT::ImageType::BGR_24BIT);
 	UINT32 hsvIndex = 0;
 
@@ -364,11 +326,11 @@ void Segment::CalcColourHist(const Image& hsv
 	}
 
 	C_UINT32 bin = 25;
-	Library lib;
+
 	region.colorHist = new float[bin * 3]{ 0 };
 
-	lib.SetHistogram24bit(hsvData, region.colorHist, region.size, 1, 0, 255, bin);
-	lib.SetNormalizedHistogram24bit(region.colorHist, bin);
+	MNDT::SetHistogram24bit(hsvData, region.colorHist, region.size, 1, 0, 255, bin);
+	MNDT::SetNormalizedHistogram24bit(region.colorHist, bin);
 
 	delete[] hsvData;
 	hsvData = nullptr;
@@ -384,7 +346,7 @@ void Segment::CalcTextureHist(const Image& image
 
 	C_UINT32 orientations = 8;
 	C_UINT32 bin = 10;
-	C_UCHAE interval = 255 / bin;
+	C_UCHAR interval = 255 / bin;
 	C_UINT32 width = image.Width();
 	C_UINT32 maxHeight = region.rect.EndY() + 1;
 	C_UINT32 maxWidth = region.rect.EndX() + 1;
@@ -417,13 +379,11 @@ void Segment::CalcTextureHist(const Image& image
 		}
 	}
 
-	Library lib;
-
 	for (UINT32 index = 0; index < orientations; index++)
 	{
-		lib.SetNormalizedHistogram8bit(region.textureHist + index * bin, bin, MNDT::Normalized::L1);
-		lib.SetNormalizedHistogram8bit(region.textureHist + index * bin + diff, bin, MNDT::Normalized::L1);
-		lib.SetNormalizedHistogram8bit(region.textureHist + index * bin + diff + diff, bin, MNDT::Normalized::L1);
+		MNDT::SetNormalizedHistogram8bit(region.textureHist + index * bin, bin, MNDT::Normalized::L1);
+		MNDT::SetNormalizedHistogram8bit(region.textureHist + index * bin + diff, bin, MNDT::Normalized::L1);
+		MNDT::SetNormalizedHistogram8bit(region.textureHist + index * bin + diff + diff, bin, MNDT::Normalized::L1);
 	}
 
 
@@ -475,12 +435,10 @@ std::map<UINT32, Region> Segment::ExtractRegion(const Image& image
 
 	CalcTextureGradient(image, angle);
 
-
-	Library lib;
-	UCHAE* hsv = new UCHAE[width * height * 3];
+	UCHAR* hsv = new UCHAR[width * height * 3];
 	Image hsvImage(hsv, width, height, MNDT::ImageType::BGR_24BIT);
 
-	lib.ChangeColor(image.data, hsv
+	MNDT::ChangeColor(image.data, hsv
 		, width, height
 		, ColerType::BGR2HSV);
 

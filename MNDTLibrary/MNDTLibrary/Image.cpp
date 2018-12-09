@@ -1,6 +1,6 @@
 #include "Image.h"
 
-Image::Image(UCHAE* src
+Image::Image(UCHAR* src
 	, C_UINT32 width, C_UINT32 height
 	, MNDT::ImageType type)
 {
@@ -9,7 +9,7 @@ Image::Image(UCHAE* src
 	_type = type;
 
 	data = src;
-	image = new UCHAE*[height];
+	image = new UCHAR*[height];
 
 	for (UINT32 index = 0; index < height; index++)
 	{
@@ -33,7 +33,7 @@ UINT32 Image::Height() const
 	return _height;
 }
 
-void Image::SetPixel(C_UINT32 row, C_UINT32 col, Pixel pix) const
+void Image::SetPixel(C_UINT32 row, C_UINT32 col, Pixel pix)
 {
 	switch (_type)
 	{

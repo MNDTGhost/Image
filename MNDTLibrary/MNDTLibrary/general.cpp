@@ -1,6 +1,6 @@
 #include "general.h"
 
-//extern void MNDT::Write(C_UCHAE* str)
+//extern void MNDT::Write(C_UCHAR* str)
 //{
 //	std::fstream fwLog;
 //
@@ -9,6 +9,8 @@
 //	fwLog.close();
 //}
 
-
-extern char* MNDT::LOG_FILE = "D:\\Log.txt";
-extern double MNDT::PI = 3.1415926535;
+namespace MNDT
+{
+	char* LOG_FILE = "D:\\Log.txt";
+	double PI = 3.1415926535;
+}

@@ -152,6 +152,7 @@
     <ClCompile Include="general.cpp" />
     <ClCompile Include="GraphTree.cpp" />
     <ClCompile Include="HOG.cpp" />
+    <ClCompile Include="Hough.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="LBP.cpp" />
     <ClCompile Include="Library.cpp" />
@@ -166,6 +167,7 @@
     <ClInclude Include="general.h" />
     <ClInclude Include="GraphTree.h" />
     <ClInclude Include="HOG.h" />
+    <ClInclude Include="Hough.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="LBP.h" />
     <ClInclude Include="Library.h" />

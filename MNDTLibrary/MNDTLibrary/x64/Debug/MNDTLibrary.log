@@ -1,4 +1,17 @@
-﻿  Library.cpp
-     正在建立程式庫 D:\Visual Studio 2013 Project\Projects\MNDTLibrary\x64\Debug\MNDTLibrary.lib 和物件 D:\Visual Studio 2013 Project\Projects\MNDTLibrary\x64\Debug\MNDTLibrary.exp
+﻿  GaussianElimination.cpp
+  GraphTree.cpp
+  HOG.cpp
+  Hough.cpp
+  Image.cpp
+  LBP.cpp
+  Library.cpp
+  MNDTLibrary.cpp
+  Point.cpp
+  Rect.cpp
+  Segment.cpp
+  draw.cpp
+  general.cpp
+  Generating Code...
+     Creating library D:\Visual Studio 2013 Project\Projects\MNDTLibrary\x64\Debug\MNDTLibrary.lib and object D:\Visual Studio 2013 Project\Projects\MNDTLibrary\x64\Debug\MNDTLibrary.exp
   MNDTLibrary.vcxproj -> D:\Visual Studio 2013 Project\Projects\MNDTLibrary\x64\Debug\MNDTLibrary.dll
   MNDTLibrary.vcxproj -> D:\Visual Studio 2013 Project\Projects\MNDTLibrary\x64\Debug\MNDTLibrary.pdb (Full PDB)

@@ -31,12 +31,15 @@
     <Filter Include="標頭檔\Feature">
       <UniqueIdentifier>{5c8c492b-c9c9-4239-9e8a-029bcbbb2dd1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="資源檔\Library">
+      <UniqueIdentifier>{9f61a816-a152-4c36-b081-6c2c97c2d907}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="標頭檔\Library">
+      <UniqueIdentifier>{584f591e-ca3a-46bc-bbfe-1ceb09c567d1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MNDTLibrary.cpp">
-      <Filter>資源檔</Filter>
-    </ClCompile>
-    <ClCompile Include="Library.cpp">
       <Filter>資源檔</Filter>
     </ClCompile>
     <ClCompile Include="Image.cpp">
@@ -69,11 +72,14 @@
     <ClCompile Include="HOG.cpp">
       <Filter>資源檔\Feature</Filter>
     </ClCompile>
+    <ClCompile Include="Hough.cpp">
+      <Filter>資源檔\Library</Filter>
+    </ClCompile>
+    <ClCompile Include="Library.cpp">
+      <Filter>資源檔\Library</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Library.h">
-      <Filter>標頭檔</Filter>
-    </ClInclude>
     <ClInclude Include="general.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
@@ -103,6 +109,12 @@
     </ClInclude>
     <ClInclude Include="HOG.h">
       <Filter>標頭檔\Feature</Filter>
+    </ClInclude>
+    <ClInclude Include="Hough.h">
+      <Filter>標頭檔\Library</Filter>
+    </ClInclude>
+    <ClInclude Include="Library.h">
+      <Filter>標頭檔\Library</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

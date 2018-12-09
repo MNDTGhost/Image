@@ -101,7 +101,7 @@ public:
 		return threshold / size;
 	}
 
-	void SegmentImage(C_UCHAE* src, UCHAE* pur
+	void SegmentImage(C_UCHAR* src, UCHAR* pur
 		, C_UINT32 width, C_UINT32 height
 		, C_FLOAT sigma, C_FLOAT threshold, C_UINT32 minSize
 		, GraphTree* graphTree);
@@ -109,7 +109,7 @@ public:
 	void Visualization(Image& image
 		, GraphTree* graphTree);
 
-	void SelectiveSearch(C_UCHAE* src, UCHAE* pur
+	void SelectiveSearch(C_UCHAR* src, UCHAR* pur
 		, C_UINT32 width, C_UINT32 height
 		, C_FLOAT sigma, C_FLOAT threshold, C_UINT32 minSize);
 private:

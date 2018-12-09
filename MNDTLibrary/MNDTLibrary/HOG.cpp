@@ -4,68 +4,69 @@ HOG::~HOG()
 {
 }
 
-inline UINT32 HOG::FixWidth(C_UINT32& width)
+inline C_UINT32 HOG::FixWidth(C_UINT32& width) const
 {
 	return static_cast<UINT32>(ceil(static_cast<float>(width) / _cellX) * _cellX);
 }
 
-inline UINT32 HOG::FixHeight(C_UINT32& height)
+inline C_UINT32 HOG::FixHeight(C_UINT32& height) const
 {
 	return static_cast<UINT32>(ceil(static_cast<float>(height) / _cellY) * _cellY);
 }
 
-inline UINT32 HOG::CellXSize(C_UINT32& width)
+inline C_UINT32 HOG::CellXSize(C_UINT32& width) const
 {
 	return static_cast<UINT32>(ceil(static_cast<float>(width) / _cellX));
 }
 
-inline UINT32 HOG::CellYSize(C_UINT32& height)
+inline C_UINT32 HOG::CellYSize(C_UINT32& height) const
 {
 	return static_cast<UINT32>(ceil(static_cast<float>(height) / _cellY));
 }
 
-inline UINT32 HOG::BlockXSize(C_UINT32& cellXSize)
+inline C_UINT32 HOG::BlockXSize(C_UINT32& cellXSize) const
 {
 	return cellXSize - _blockX + 1;
 }
 
-inline UINT32 HOG::BlockYSize(C_UINT32& cellYSize)
+inline C_UINT32 HOG::BlockYSize(C_UINT32& cellYSize) const
 {
 	return cellYSize - _blockX + 1;
 }
-inline UINT32 HOG::BlockHisSize()
+inline C_UINT32 HOG::BlockHisSize() const
 {
 	return _blockX * _blockY * _bin;
 }
 
-UINT32 HOG::CellHisTotalSize(C_UINT32& width, C_UINT32& height)
+inline C_UINT32 HOG::CellHisTotalSize(C_UINT32& width, C_UINT32& height) const
 {
 	return CellXSize(width)
 		* CellYSize(height)
 		* _bin;
 }
 
-UINT32 HOG::BlockHisTotalSize(C_UINT32& width, C_UINT32& height)
+inline C_UINT32 HOG::BlockHisTotalSize(C_UINT32& width, C_UINT32& height) const
 {
 	return BlockXSize(CellXSize(width))
 		* BlockYSize(CellYSize(height))
 		* BlockHisSize();
 }
 
-void HOG::Gradient(C_UCHAE* src
+void HOG::Gradient(C_UCHAR* src
 	, C_UINT32 width, C_UINT32 height
 	, double* amplitudes, double* angles)
 {
+	// 1. padding
 	C_DOUBLE angle = 180.0 / MNDT::PI;
 	C_UINT32 padWidth = width + 2;
 	C_UINT32 padHeight = height + 2;
-	UCHAE* padData = new UCHAE[padWidth * padHeight];
-	Library lib;
-
-	lib.ImagePadding8bit(src, padData, width, height, 1);
+	UCHAR* padData = new UCHAR[padWidth * padHeight];
+	
+	MNDT::ImagePadding8bit(src, padData, width, height, 1);
 
 	Image padImage(padData, padWidth, padHeight, MNDT::ImageType::GRAY_8BIT);
 
+	// 2. calculate hog of gradient
 	for (UINT32 row = 1; row < padHeight - 1; row++)
 	{
 		for (UINT32 col = 1; col < padWidth - 1; col++)
@@ -77,7 +78,7 @@ void HOG::Gradient(C_UCHAE* src
 				- static_cast<float>(padImage.image[row - 1][col]);
 
 			*angles = abs(atan2(Gy, Gx) * angle);
-			*amplitudes = sqrt(Gx * Gx + Gy *Gy);
+			*amplitudes = sqrt(Gx * Gx + Gy * Gy);
 
 			angles++;
 			amplitudes++;
@@ -88,7 +89,7 @@ void HOG::Gradient(C_UCHAE* src
 	padData = nullptr;
 }
 
-void HOG::GradienView(C_UCHAE* src, UCHAE* pur
+void HOG::GradienView(C_UCHAR* src, UCHAR* pur
 	, C_UINT32 width, C_UINT32 height)
 {
 	C_UINT32 size = width * height;
@@ -101,12 +102,12 @@ void HOG::GradienView(C_UCHAE* src, UCHAE* pur
 	delete[] angles;
 	angles = nullptr;
 
-	UCHAE* endPur = pur + size;
+	UCHAR* endPur = pur + size;
 	double* amplitudesPointer = amplitudes;
 
 	while (pur < endPur)
 	{
-		*pur = static_cast<UCHAE>(*amplitudesPointer);
+		*pur = static_cast<UCHAR>(*amplitudesPointer);
 
 		pur++;
 		amplitudesPointer++;
@@ -116,7 +117,96 @@ void HOG::GradienView(C_UCHAE* src, UCHAE* pur
 	amplitudes = nullptr;
 }
 
-void HOG::ReSize(C_UCHAE* src, UCHAE** resizeData
+void HOG::HOGBlockView(C_UCHAR* src, UCHAR* pur
+	, C_UINT32 width, C_UINT32 height)
+{
+	float* blockHistogram = new float[BlockHisTotalSize(width, height)];
+
+	// step 1.2.3.4
+	BlockHistogram(src, width, height
+		, blockHistogram);
+
+
+
+
+	C_UINT32 reWidth = FixWidth(width);
+	C_UINT32 reHeight = FixHeight(height);
+	C_UINT32 cellXSize = CellXSize(reWidth);
+	C_UINT32 cellYSize = CellYSize(reHeight);
+	C_UINT32 cellWidth = _bin * cellXSize;
+	C_UINT32 blockHisSize = BlockHisSize();
+	C_UINT32 blockXSize = BlockXSize(cellXSize);
+	C_UINT32 blockYSize = BlockYSize(cellYSize);
+	C_UINT32 cellHisTotalSize = CellHisTotalSize(width, height);
+	C_FLOAT* blockHistogramPointer = blockHistogram;
+	float* cellHistogram = new float[cellHisTotalSize] { 0.0f };
+	UINT32* cellHisCount = new UINT32[cellHisTotalSize]{ 0 };
+
+	// 5. calculate the block histogram to cell histogram
+	for (UINT32 row = 0; row < blockYSize; row++)
+	{
+		for (UINT32 col = 0; col < blockXSize; col++)
+		{
+			HOGViewSum(blockHistogramPointer, cellWidth
+				, cellHistogram, cellHisCount
+				, col, row
+				, col + _blockX, row + _blockY);
+			blockHistogramPointer += blockHisSize;
+		}
+	}
+
+	delete[] blockHistogram;
+	blockHistogram = nullptr;
+
+
+	// 6. calculate average of the cell histogram
+	HOGViewAvg(cellHistogram, cellHisCount
+		, cellHisTotalSize);
+
+	delete[] cellHisCount;
+	cellHisCount = nullptr;
+
+
+	// 7. calculate normalization of the cell histogram
+	HistogramNorm(cellHistogram
+		, cellHisTotalSize, _bin
+		, 1);
+
+
+	// 8. draw for the cell histogram
+	HOGDrawCell(pur
+		, width, height
+		, cellHistogram);
+
+	delete[] cellHistogram;
+	cellHistogram = nullptr;
+}
+
+void HOG::HOGCellView(C_UCHAR* src, UCHAR* pur
+	, C_UINT32 width, C_UINT32 height)
+{
+	C_UINT32 cellHisTotalSize = CellHisTotalSize(width, height);
+	float* histogram = new float[cellHisTotalSize] { 0.0f };
+
+	// step 1.2.3
+	CellHistogram(src, width, height
+		, histogram);
+
+	// 4. normalization
+	HistogramNorm(histogram
+		, cellHisTotalSize, _bin
+		, 1);
+
+	// 5. draw
+	HOGDrawCell(pur
+		, width, height
+		, histogram);
+
+	delete[] histogram;
+	histogram = nullptr;
+}
+
+void HOG::ReSize(C_UCHAR* src, UCHAR** resizeData
 	, C_UINT32 width, C_UINT32 height)
 {
 	assert(*resizeData == nullptr);
@@ -127,31 +217,30 @@ void HOG::ReSize(C_UCHAE* src, UCHAE** resizeData
 
 	if (resize)
 	{
-		Library lib;
-		*resizeData = new UCHAE[reWidth * reHeight];
+		*resizeData = new UCHAR[reWidth * reHeight];
 
-		lib.Resize8bit(src, *resizeData
+		MNDT::Resize8bit(src, *resizeData
 			, width, height
 			, reWidth, reHeight
 			, MNDT::ResizeType::NEAREST);
 	}
 	else
 	{
-		*resizeData = const_cast<UCHAE*>(src);
+		*resizeData = const_cast<UCHAR*>(src);
 	}
 }
 
-void HOG::CellHistogram(C_UCHAE* src, C_UINT32 width, C_UINT32 height
+void HOG::CellHistogram(C_UCHAR* src, C_UINT32 width, C_UINT32 height
 	, float* histogram)
 {
-	// fix size
-	UCHAE* resizeData = nullptr;
+	// 1. fix size
+	UCHAR* resizeData = nullptr;
 
 	ReSize(src, &resizeData, width, height);
 
 
 
-	// get gradient
+	// 2. get gradient
 	C_UINT32 reWidth = FixWidth(width);
 	C_UINT32 reHeight = FixHeight(height);
 	C_UINT32 size = reWidth * reHeight;
@@ -172,7 +261,7 @@ void HOG::CellHistogram(C_UCHAE* src, C_UINT32 width, C_UINT32 height
 
 
 
-	// histogram
+	// 3. calculate histogram
 	for (UINT32 row = 0; row < reHeight; row += _cellY)
 	{
 		for (UINT32 col = 0; col < reWidth; col += _cellX)
@@ -212,70 +301,13 @@ void HOG::CalcCellHistogram(C_DOUBLE* angles, C_UINT32 width
 	}
 }
 
-void HOG::BlockHistogram(C_UCHAE* src, C_UINT32 width, C_UINT32 height
-	, float* histogram)
-{
-	C_UINT32 reWidth = FixWidth(width);
-	C_UINT32 reHeight = FixHeight(height);
-	C_UINT32 cellXSize = CellXSize(reWidth);
-	C_UINT32 cellYSize = CellYSize(reHeight);
-	float* cellHistogram = new float[CellHisTotalSize(reWidth, reHeight)]{ 0 };
-
-	CellHistogram(src, width, height
-		, cellHistogram);
-
-	Library lib;
-	C_UINT32 cellWidth = _bin * cellXSize;
-	C_UINT32 blockHisSize = BlockHisSize();
-	C_UINT32 blockXSize = BlockXSize(cellXSize);
-	C_UINT32 blockYSize = BlockYSize(cellYSize);
-
-	for (UINT32 row = 0; row < blockYSize; row++)
-	{
-		for (UINT32 col = 0; col < blockXSize; col++)
-		{
-			CalcBlockHistogram(cellHistogram, cellWidth
-				, histogram
-				, col, row
-				, col + _blockX, row + _blockY);
-			//lib.SetNormalizedHistogram8bit(histogram, blockHisSize, MNDT::Normalized::L2);
-			histogram += blockHisSize;
-		}
-	}
-
-	delete[] cellHistogram;
-	cellHistogram = nullptr;
-}
-
-void HOG::CalcBlockHistogram(C_FLOAT* cellHistogram, C_UINT32 cellXSize
-	, float* histogram
-	, C_UINT32 sCellX, C_UINT32 sCellY
-	, C_UINT32 eCellX, C_UINT32 eCellY)
-{
-	C_UINT32 copySize = _bin * sizeof(float);
-
-	for (UINT32 row = sCellY; row < eCellY; row++)
-	{
-		C_UINT32 rowIndex = row * cellXSize;
-
-		for (UINT32 col = sCellX; col < eCellX; col++)
-		{
-			C_UINT32 index = rowIndex + col * _bin;
-			memcpy(histogram, cellHistogram + index, copySize);
-			histogram += _bin;
-		}
-	}
-}
-
 void HOG::HistogramNorm(float* histogram
 	, C_UINT32 hisTotalSize, C_UINT32 hisSIze
 	, C_UINT32 base)
 {
-	Library lib;
-
 	for (UINT32 index = 0; index < hisTotalSize; index += hisSIze)
 	{
-		lib.SetNormalizedHistogram8bit(histogram, hisSIze, static_cast<float>(base));
+		MNDT::SetNormalizedHistogram8bit(histogram, hisSIze, static_cast<float>(base));
 		histogram += hisSIze;
 	}
 }
@@ -283,106 +315,14 @@ void HOG::HistogramNorm(float* histogram
 void HOG::HistogramNorm2(float* histogram
 	, C_UINT32 hisTotalSize, C_UINT32 hisSIze)
 {
-	Library lib;
-
 	for (UINT32 index = 0; index < hisTotalSize; index += hisSIze)
 	{
-		lib.SetNormalizedHistogram8bit(histogram, hisSIze, MNDT::Normalized::L2);
+		MNDT::SetNormalizedHistogram8bit(histogram, hisSIze, MNDT::Normalized::L2);
 		histogram += hisSIze;
 	}
 }
 
-void HOG::HOGBlockView(C_UCHAE* src, UCHAE* pur
-	, C_UINT32 width, C_UINT32 height)
-{
-	float* blockHistogram = new float[BlockHisTotalSize(width, height)];
-
-	BlockHistogram(src, width, height
-		, blockHistogram);
-
-
-
-
-	C_UINT32 reWidth = FixWidth(width);
-	C_UINT32 reHeight = FixHeight(height);
-	C_UINT32 cellXSize = CellXSize(reWidth);
-	C_UINT32 cellYSize = CellYSize(reHeight);
-	C_UINT32 cellWidth = _bin * cellXSize;
-	C_UINT32 blockHisSize = BlockHisSize();
-	C_UINT32 blockXSize = BlockXSize(cellXSize);
-	C_UINT32 blockYSize = BlockYSize(cellYSize);
-	C_UINT32 cellHisTotalSize = CellHisTotalSize(width, height);
-	float* blockHistogramPointer = blockHistogram;
-	float* cellHistogram = new float[cellHisTotalSize]{ 0.0f };
-	UINT32* cellHisCount = new UINT32[cellHisTotalSize]{ 0 };
-
-	for (UINT32 row = 0; row < blockYSize; row++)
-	{
-		for (UINT32 col = 0; col < blockXSize; col++)
-		{
-			HOGViewSum(blockHistogramPointer, cellWidth
-				, cellHistogram, cellHisCount
-				, col, row
-				, col + _blockX, row + _blockY);
-			blockHistogramPointer += blockHisSize;
-		}
-	}
-
-	delete[] blockHistogram;
-	blockHistogram = nullptr;
-
-
-
-	HOGViewAvg(cellHistogram, cellHisCount
-		, cellHisTotalSize);
-
-	delete[] cellHisCount;
-	cellHisCount = nullptr;
-
-	HistogramNorm(cellHistogram
-		, cellHisTotalSize, _bin
-		, 1);
-
-	HOGDrawCell(pur
-		, width, height
-		, cellHistogram);
-
-	delete[] cellHistogram;
-	cellHistogram = nullptr;
-}
-
-void HOG::HOGCellView(C_UCHAE* src, UCHAE* pur
-	, C_UINT32 width, C_UINT32 height)
-{
-	C_UINT32 reWidth = FixWidth(width);
-	C_UINT32 reHeight = FixHeight(height);
-	C_UINT32 cellXSize = CellXSize(reWidth);
-	C_UINT32 cellYSize = CellYSize(reHeight);
-	C_UINT32 cellWidth = _bin * cellXSize;
-	C_UINT32 blockHisSize = BlockHisSize();
-	C_UINT32 blockXSize = BlockXSize(cellXSize);
-	C_UINT32 blockYSize = BlockYSize(cellYSize);
-	C_UINT32 cellHisTotalSize = CellHisTotalSize(width, height);
-	float* histogram = new float[cellHisTotalSize]{ 0.0f };
-
-	CellHistogram(src, width, height
-		, histogram);
-
-	HistogramNorm(histogram
-		, cellHisTotalSize, _bin
-		, 1);
-
-	HOGDrawCell(pur
-		, width, height
-		, histogram);
-
-	delete[] histogram;
-	histogram = nullptr;
-
-
-}
-
-void HOG::HOGDrawCell(UCHAE* pur
+void HOG::HOGDrawCell(UCHAR* pur
 	, C_UINT32 width, C_UINT32 height
 	, float* cellHistogram)
 {
@@ -416,6 +356,62 @@ void HOG::HOGDrawCell(UCHAE* pur
 				MNDT::DrawLine8bit(purImgae, centerPoint, binPoint);
 			}
 			cellHistogram += _bin;
+		}
+	}
+}
+
+void HOG::BlockHistogram(C_UCHAR* src, C_UINT32 width, C_UINT32 height
+	, float* histogram)
+{
+	C_UINT32 reWidth = FixWidth(width);
+	C_UINT32 reHeight = FixHeight(height);
+	C_UINT32 cellXSize = CellXSize(reWidth);
+	C_UINT32 cellYSize = CellYSize(reHeight);
+	float* cellHistogram = new float[CellHisTotalSize(reWidth, reHeight)]{ 0 };
+
+	// step 1.2.3
+	CellHistogram(src, width, height
+		, cellHistogram);
+
+	// 4. copy the cell histogram to the block histogram
+	C_UINT32 cellWidth = _bin * cellXSize;
+	C_UINT32 blockHisSize = BlockHisSize();
+	C_UINT32 blockXSize = BlockXSize(cellXSize);
+	C_UINT32 blockYSize = BlockYSize(cellYSize);
+
+	for (UINT32 row = 0; row < blockYSize; row++)
+	{
+		for (UINT32 col = 0; col < blockXSize; col++)
+		{
+			CalcBlockHistogram(cellHistogram, cellWidth
+				, histogram
+				, col, row
+				, col + _blockX, row + _blockY);
+			//MNDT::SetNormalizedHistogram8bit(histogram, blockHisSize, MNDT::Normalized::L2);
+			histogram += blockHisSize;
+		}
+	}
+
+	delete[] cellHistogram;
+	cellHistogram = nullptr;
+}
+
+void HOG::CalcBlockHistogram(C_FLOAT* cellHistogram, C_UINT32 cellWidth
+	, float* histogram
+	, C_UINT32 sCellX, C_UINT32 sCellY
+	, C_UINT32 eCellX, C_UINT32 eCellY)
+{
+	C_UINT32 copySize = _bin * sizeof(float);
+
+	for (UINT32 row = sCellY; row < eCellY; row++)
+	{
+		C_UINT32 rowIndex = row * cellWidth;
+
+		for (UINT32 col = sCellX; col < eCellX; col++)
+		{
+			C_UINT32 index = rowIndex + col * _bin;
+			memcpy(histogram, cellHistogram + index, copySize);
+			histogram += _bin;
 		}
 	}
 }

@@ -11,48 +11,48 @@ public:
 	HOG(C_UINT32 cellX = 8, C_UINT32 cellY = 8, C_UINT32 blockX = 2, C_UINT32 blockY = 2) :
 		_cellX(cellX), _cellY(cellY), _blockX(blockX), _blockY(blockY) {};
 
-	UINT32 CellHisTotalSize(C_UINT32& width, C_UINT32& height);
+	inline C_UINT32 CellHisTotalSize(C_UINT32& width, C_UINT32& height) const;
 
-	UINT32 BlockHisTotalSize(C_UINT32& width, C_UINT32& height);
+	inline C_UINT32 BlockHisTotalSize(C_UINT32& width, C_UINT32& height) const;
 
-	void GradienView(C_UCHAE* src, UCHAE* pur
+	void GradienView(C_UCHAR* src, UCHAR* pur
 		, C_UINT32 width, C_UINT32 height);
 
-	void CellHistogram(C_UCHAE* src, C_UINT32 width, C_UINT32 height
+	void CellHistogram(C_UCHAR* src, C_UINT32 width, C_UINT32 height
 		, float* histogram);
 
-	void BlockHistogram(C_UCHAE* src, C_UINT32 width, C_UINT32 height
+	void BlockHistogram(C_UCHAR* src, C_UINT32 width, C_UINT32 height
 		, float* histogram);
 
-	void HOGCellView(C_UCHAE* src, UCHAE* pur
+	void HOGCellView(C_UCHAR* src, UCHAR* pur
 		, C_UINT32 width, C_UINT32 height);
 
-	void HOGBlockView(C_UCHAE* src, UCHAE* pur
+	void HOGBlockView(C_UCHAR* src, UCHAR* pur
 		, C_UINT32 width, C_UINT32 height);
 
-	void HOGDrawCell(UCHAE* pur
+	void HOGDrawCell(UCHAR* pur
 		, C_UINT32 width, C_UINT32 height
 		, float* cellHistogram);
 private:
 
-	inline UINT32 FixWidth(C_UINT32& width);
+	inline C_UINT32 FixWidth(C_UINT32& width) const;
 
-	inline UINT32 FixHeight(C_UINT32& height);
+	inline C_UINT32 FixHeight(C_UINT32& height) const;
 
-	inline UINT32 CellXSize(C_UINT32& width);
+	inline C_UINT32 CellXSize(C_UINT32& width) const;
 
-	inline UINT32 CellYSize(C_UINT32& height);
+	inline C_UINT32 CellYSize(C_UINT32& height) const;
 
-	inline UINT32 BlockXSize(C_UINT32& cellXSize);
+	inline C_UINT32 BlockXSize(C_UINT32& cellXSize) const;
 
-	inline UINT32 BlockYSize(C_UINT32& cellYSize);
+	inline C_UINT32 BlockYSize(C_UINT32& cellYSize) const;
 
-	inline UINT32 BlockHisSize();
+	inline C_UINT32 BlockHisSize() const;
 
-	void ReSize(C_UCHAE* src, UCHAE** resizeData
+	void ReSize(C_UCHAR* src, UCHAR** resizeData
 		, C_UINT32 width, C_UINT32 height);
 
-	void Gradient(C_UCHAE* src
+	void Gradient(C_UCHAR* src
 		, C_UINT32 width, C_UINT32 height
 		, double* amplitudes, double* angles);
 
